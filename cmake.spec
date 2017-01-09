@@ -10,7 +10,7 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.6.3
+Version:	3.7.1
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
@@ -33,6 +33,7 @@ BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
 BuildRequires:	pkgconfig(libcurl)
 BuildRequires:	pkgconfig(libidn)
+BuildRequires:	pkgconfig(libuv)
 BuildRequires:	pkgconfig(zlib)
 BuildRequires:	cmake(jsoncpp)
 BuildRequires:	xz
@@ -153,6 +154,9 @@ cd build
 %install
 %makeinstall_std -C build
 
+# vim syntax highlighting and indentation rules...
+mv %{buildroot}%{_datadir}/cmake/editors/vim %{buildroot}%{_datadir}
+
 # cmake mode for emacs
 mkdir -p %{buildroot}%{_datadir}/emacs/site-lisp %{buildroot}%{_sysconfdir}/emacs/site-start.d
 mv %{buildroot}%{_datadir}/cmake/editors/emacs/cmake-mode.el %{buildroot}%{_datadir}/emacs/site-lisp/cmake-mode.el
@@ -164,12 +168,6 @@ cat <<EOF >%{buildroot}%{_sysconfdir}/emacs/site-start.d/%{name}.el
                 ("\\\\.cmake\\\\'" . cmake-mode))
               auto-mode-alist))
 EOF
-
-# cmake mode for vim
-mkdir -p %{buildroot}%{_datadir}/vim/syntax %{buildroot}%{_datadir}/vim/indent %{buildroot}%{_datadir}/vim/plugin
-mv %{buildroot}%{_datadir}/cmake/editors/vim/cmake-syntax.vim %{buildroot}%{_datadir}/vim/syntax/cmake.vim
-mv %{buildroot}%{_datadir}/cmake/editors/vim/cmake-indent.vim %{buildroot}%{_datadir}/vim/indent/cmake.vim
-mv %{buildroot}%{_datadir}/cmake/editors/vim/cmake-help.vim %{buildroot}%{_datadir}/vim/plugin/cmake-help.vim
 
 # remove directory we just cleared by moving files where editors
 # will actually find them
