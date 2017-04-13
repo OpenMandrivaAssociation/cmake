@@ -10,7 +10,7 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.7.2
+Version:	3.8.0
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
@@ -45,6 +45,7 @@ BuildRequires:	qmake5
 BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Widgets)
 BuildRequires:	qt5-platformtheme-gtk2
+BuildRequires:	rhash-devel
 # Ensure tests of Qt5Gui's cmake builds don't result in an error
 # because libqdirectfb.so and friends have been "removed" since creating the
 # cmake module
