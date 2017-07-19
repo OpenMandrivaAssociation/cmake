@@ -10,12 +10,12 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.8.2
+Version:	3.9.0
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	2
+Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 Epoch:		1
@@ -26,9 +26,8 @@ Source1:	cmake.macros
 Source2:	cmake.rpmlintrc
 # fix ftlk detection
 Patch1:		0001-Fix-FLTK-Find-path.patch
-Patch2:		cmake-3.4.0-clang-std-version.patch
-Patch3:		0003-Disable-Test198.patch
-Patch4:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
+Patch2:		cmake-3.9.0-clang-5.0.patch
+Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
 BuildRequires:	pkgconfig(libcurl)
@@ -110,7 +109,7 @@ This is the Qt GUI.
 
 %files -n %{name}-qtgui
 %{_bindir}/cmake-gui
-%{_datadir}/applications/CMake.desktop
+%{_datadir}/applications/cmake-gui.desktop
 %{_datadir}/mime/packages/cmakecache.xml
 %{_datadir}/icons/*/*/*/CMakeSetup.png
 %endif

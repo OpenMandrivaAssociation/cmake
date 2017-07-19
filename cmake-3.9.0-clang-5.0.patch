@@ -1,0 +1,44 @@
+--- cmake-3.9.0/Source/LexerParser/cmCommandArgumentParser.cxx.omv~	2017-07-19 10:27:55.681738349 +0200
++++ cmake-3.9.0/Source/LexerParser/cmCommandArgumentParser.cxx	2017-07-19 10:28:02.516575958 +0200
+@@ -291,7 +291,7 @@ typedef short int yytype_int16;
+ # define YYUSE(E) /* empty */
+ #endif
+ 
+-#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
++#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__ && !defined __clang__
+ /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
+ # define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+     _Pragma ("GCC diagnostic push") \
+--- cmake-3.9.0/Source/LexerParser/cmDependsJavaParser.cxx.omv~	2017-07-19 10:27:12.481764694 +0200
++++ cmake-3.9.0/Source/LexerParser/cmDependsJavaParser.cxx	2017-07-19 10:27:23.222509525 +0200
+@@ -462,7 +462,7 @@ typedef short int yytype_int16;
+ # define YYUSE(E) /* empty */
+ #endif
+ 
+-#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
++#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__ && !defined __clang__
+ /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
+ # define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+     _Pragma ("GCC diagnostic push") \
+--- cmake-3.9.0/Source/LexerParser/cmExprParser.cxx.omv~	2017-07-19 10:27:29.568358763 +0200
++++ cmake-3.9.0/Source/LexerParser/cmExprParser.cxx	2017-07-19 10:27:36.385196808 +0200
+@@ -276,7 +276,7 @@ typedef short int yytype_int16;
+ # define YYUSE(E) /* empty */
+ #endif
+ 
+-#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
++#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__ && !defined __clang__
+ /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
+ # define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+     _Pragma ("GCC diagnostic push") \
+--- cmake-3.9.0/Source/LexerParser/cmFortranParser.cxx.omv~	2017-07-19 10:27:42.194058800 +0200
++++ cmake-3.9.0/Source/LexerParser/cmFortranParser.cxx	2017-07-19 10:27:49.691880662 +0200
+@@ -359,7 +359,7 @@ typedef short int yytype_int16;
+ # define YYUSE(E) /* empty */
+ #endif
+ 
+-#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
++#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__ && !defined __clang__
+ /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
+ # define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+     _Pragma ("GCC diagnostic push") \
