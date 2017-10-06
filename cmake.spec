@@ -42,7 +42,6 @@ BuildRequires:	qmake5
 BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Widgets)
 BuildRequires:	qt5-platformtheme-gtk2
-BuildRequires:	rhash-devel
 # Ensure tests of Qt5Gui's cmake builds don't result in an error
 # because libqdirectfb.so and friends have been "removed" since creating the
 # cmake module
@@ -51,6 +50,7 @@ BuildRequires:	%{mklibname qt5gui 5}-x11
 BuildRequires:	%{mklibname qt5gui 5}-linuxfb
 BuildRequires:	%{mklibname qt5gui 5}-minimal
 %endif
+BuildRequires:	rhash-devel
 BuildRequires:	gcc-gfortran
 
 %description
