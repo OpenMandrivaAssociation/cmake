@@ -1,7 +1,9 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 # fix me
-%ifarch %{ix86}
-%bcond_without	bootstrap
+%ifnarch %armx
+%bcond_with	bootstrap
+%else
+%bcond_with	bootstrap
 %endif
 
 %define beta %{nil}
