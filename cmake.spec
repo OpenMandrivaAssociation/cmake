@@ -76,7 +76,6 @@ generation, and template instantiation.
 %{_datadir}/vim/*/*
 %{_datadir}/aclocal/cmake.m4
 
-
 %package doc
 Summary:	Documentation for %{name}
 Group:		Development/Other
@@ -134,6 +133,10 @@ sed -i -e 's!SET(CMAKE_LONG_TEST_TIMEOUT 1500)!SET(CMAKE_LONG_TEST_TIMEOUT 7200)
 %endif
 
 %build
+%if %{with bootstrap}
+%define _disable_ld_no_undefined 1
+%endif
+
 mkdir -p build
 cd build
 %setup_compile_flags
