@@ -1,7 +1,8 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 # fix me
-%ifnarch %armx
+%ifarch %armx
 %bcond_without bootstrap
+%define _disable_ld_no_undefined 1
 %else
 %bcond_with bootstrap
 %endif
@@ -133,9 +134,6 @@ sed -i -e 's!SET(CMAKE_LONG_TEST_TIMEOUT 1500)!SET(CMAKE_LONG_TEST_TIMEOUT 7200)
 %endif
 
 %build
-%if %{with bootstrap}
-%define _disable_ld_no_undefined 1
-%endif
 
 mkdir -p build
 cd build
