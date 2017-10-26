@@ -149,6 +149,7 @@ cd build
     --qt-qmake=%{_bindir}/qmake-qt5 \
 %else
     --no-system-jsoncpp \
+    --no-system-librhash \
 %endif
     --parallel=%{_smp_mflags}
 
