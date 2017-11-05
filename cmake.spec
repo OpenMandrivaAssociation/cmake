@@ -11,7 +11,7 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.9.4
+Version:	3.9.5
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
