@@ -7,7 +7,7 @@
 %bcond_with bootstrap
 %endif
 
-%define beta rc4
+%define beta %{nil}
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
