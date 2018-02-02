@@ -54,6 +54,7 @@ BuildRequires:	%{mklibname qt5gui 5}-x11
 BuildRequires:	%{mklibname qt5gui 5}-linuxfb
 BuildRequires:	%{mklibname qt5gui 5}-minimal
 %endif
+BuildRequires:	rhash-devel
 BuildRequires:	gcc-gfortran
 
 %description
