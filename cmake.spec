@@ -1,16 +1,17 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 # fix me
-%ifnarch %armx
-%bcond_with	bootstrap
+%ifarch armv7hl
+%bcond_without bootstrap
+%define _disable_ld_no_undefined 1
 %else
-%bcond_with	bootstrap
+%bcond_with bootstrap
 %endif
 
 %define beta %{nil}
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.9.4
+Version:	3.10.2
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
@@ -34,7 +35,6 @@ BuildRequires:	pkgconfig(libcurl)
 BuildRequires:	pkgconfig(libidn)
 BuildRequires:	pkgconfig(libuv)
 BuildRequires:	pkgconfig(zlib)
-BuildRequires:	cmake(jsoncpp)
 BuildRequires:	xz
 BuildRequires:	pkgconfig(expat)
 BuildRequires:	bzip2-devel
@@ -44,6 +44,8 @@ BuildRequires:	qmake5
 BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Widgets)
 BuildRequires:	qt5-platformtheme-gtk2
+BuildRequires:	rhash-devel
+BuildRequires:	cmake(jsoncpp)
 # Ensure tests of Qt5Gui's cmake builds don't result in an error
 # because libqdirectfb.so and friends have been "removed" since creating the
 # cmake module
@@ -75,7 +77,6 @@ generation, and template instantiation.
 %{_datadir}/emacs/site-lisp/cmake-mode.el
 %{_datadir}/vim/*/*
 %{_datadir}/aclocal/cmake.m4
-
 
 %package doc
 Summary:	Documentation for %{name}
@@ -134,20 +135,24 @@ sed -i -e 's!SET(CMAKE_LONG_TEST_TIMEOUT 1500)!SET(CMAKE_LONG_TEST_TIMEOUT 7200)
 %endif
 
 %build
+
 mkdir -p build
 cd build
 %setup_compile_flags
 ../configure \
     --system-libs \
-    --parallel=%{_smp_mflags} \
     --prefix=%{_prefix} \
     --datadir=/share/%{name} \
     --mandir=/share/man \
     --docdir=/share/doc/%{name} \
 %if !%{with bootstrap}
     --qt-gui \
-    --qt-qmake=%{_bindir}/qmake-qt5
+    --qt-qmake=%{_bindir}/qmake-qt5 \
+%else
+    --no-system-jsoncpp \
+    --no-system-librhash \
 %endif
+    --parallel=%{_smp_mflags}
 
 %make
 
