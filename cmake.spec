@@ -7,11 +7,11 @@
 %bcond_with bootstrap
 %endif
 
-%define beta %{nil}
+%define beta rc1
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.10.2
+Version:	3.11.0
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
@@ -25,8 +25,7 @@ Group:		Development/Other
 Url:		http://www.cmake.org/HTML/index.html
 Source1:	cmake.macros
 Source2:	cmake.rpmlintrc
-# fix ftlk detection
-Patch1:		0001-Fix-FLTK-Find-path.patch
+Patch1:		cmake-3.11.0-pthread-linkage.patch
 Patch2:		cmake-3.9.0-clang-5.0.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 BuildRequires:	perl

@@ -1,0 +1,11 @@
+--- cmake-3.11.0-rc1/Source/CMakeLists.txt.omv~	2018-02-22 14:35:49.295950116 +0100
++++ cmake-3.11.0-rc1/Source/CMakeLists.txt	2018-02-22 14:47:51.798203077 +0100
+@@ -757,7 +757,7 @@ endforeach()
+ 
+ # create a library used by the command line and the GUI
+ add_library(CMakeLib ${SRCS})
+-target_link_libraries(CMakeLib cmsys
++target_link_libraries(CMakeLib cmsys pthread
+   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
+   ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
+   ${CMAKE_CURL_LIBRARIES}
