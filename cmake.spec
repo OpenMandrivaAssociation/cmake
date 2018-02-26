@@ -13,7 +13,7 @@ Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.11.0
 %if "%{beta}" != ""
-Release:	0.%{beta}.1
+Release:	0.%{beta}.2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
 Release:	1
@@ -24,7 +24,10 @@ License:	BSD
 Group:		Development/Other
 Url:		http://www.cmake.org/HTML/index.html
 Source1:	cmake.macros
-Source2:	cmake.rpmlintrc
+Source2:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.attr
+Source3:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.prov
+Source4:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.req
+Source100:	cmake.rpmlintrc
 Patch1:		cmake-3.11.0-pthread-linkage.patch
 Patch2:		cmake-3.9.0-clang-5.0.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
@@ -73,6 +76,8 @@ generation, and template instantiation.
 %{_datadir}/%{name}
 %{_sysconfdir}/emacs/site-start.d/%{name}.el
 %{_sysconfdir}/rpm/macros.d/*
+%{_rpmconfigdir}/fileattrs/%{name}.attr
+%{_rpmconfigdir}/%{name}.*
 %{_datadir}/emacs/site-lisp/cmake-mode.el
 %{_datadir}/vim/*/*
 %{_datadir}/aclocal/cmake.m4
@@ -177,8 +182,11 @@ EOF
 # will actually find them
 rm -rf %{buildroot}%{_datadir}/cmake/editors
 
-# RPM macros
-install -m644 %{SOURCE1} -D %{buildroot}%{_sysconfdir}/rpm/macros.d/cmake.macros
+# RPM macros and dependency generators
+install -m644 %{S:1} -D %{buildroot}%{_sysconfdir}/rpm/macros.d/cmake.macros
+install -m644 %{S:2} -D %{buildroot}%{_rpmconfigdir}/fileattrs/%{name}.attr
+install -m755 %{S:3} -D %{buildroot}%{_rpmconfigdir}/%{name}.prov
+install -m755 %{S:4} -D %{buildroot}%{_rpmconfigdir}/%{name}.req
 
 # %doc wipes out files in doc dir, fixed in cooker svn for rpm package, though
 # not submitted yet, so we'll just work around this by moving it for now..
