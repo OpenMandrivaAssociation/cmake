@@ -7,13 +7,13 @@
 %bcond_with bootstrap
 %endif
 
-%define beta rc1
+%define beta rc3
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.11.0
 %if "%{beta}" != ""
-Release:	0.%{beta}.2
+Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
 Release:	1
@@ -75,7 +75,7 @@ generation, and template instantiation.
 %{_bindir}/cpack
 %{_datadir}/%{name}
 %{_sysconfdir}/emacs/site-start.d/%{name}.el
-%{_sysconfdir}/rpm/macros.d/*
+%{_rpmmacrodir}/macros.cmake
 %{_rpmconfigdir}/fileattrs/%{name}.attr
 %{_rpmconfigdir}/%{name}.*
 %{_datadir}/emacs/site-lisp/cmake-mode.el
@@ -183,7 +183,7 @@ EOF
 rm -rf %{buildroot}%{_datadir}/cmake/editors
 
 # RPM macros and dependency generators
-install -m644 %{S:1} -D %{buildroot}%{_sysconfdir}/rpm/macros.d/cmake.macros
+install -m644 %{S:1} -D %{buildroot}%{_rpmmacrodir}/macros.cmake
 install -m644 %{S:2} -D %{buildroot}%{_rpmconfigdir}/fileattrs/%{name}.attr
 install -m755 %{S:3} -D %{buildroot}%{_rpmconfigdir}/%{name}.prov
 install -m755 %{S:4} -D %{buildroot}%{_rpmconfigdir}/%{name}.req
