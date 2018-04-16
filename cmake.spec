@@ -16,7 +16,7 @@ Version:	3.11.0
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 Epoch:		1
@@ -58,6 +58,9 @@ BuildRequires:	%{mklibname qt5gui 5}-minimal
 %endif
 BuildRequires:	rhash-devel
 BuildRequires:	gcc-gfortran
+# For compatibility with Fedora and Mageia
+Provides:	cmake-filesystem = %{EVRD}
+Provides:	cmake-filesystem%{?_isa} = %{EVRD}
 
 %description
 CMake is used to control the software compilation process using
