@@ -1,11 +1,7 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
-# fix me
-%ifarch armv7hl
+
+# FIXME
 %bcond_without bootstrap
-%define _disable_ld_no_undefined 1
-%else
-%bcond_with bootstrap
-%endif
 
 %define beta %{nil}
 
