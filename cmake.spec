@@ -12,7 +12,7 @@ Version:	3.11.1
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 Epoch:		1
@@ -57,6 +57,9 @@ BuildRequires:	gcc-gfortran
 # For compatibility with Fedora and Mageia
 Provides:	cmake-filesystem = %{EVRD}
 Provides:	cmake-filesystem%{?_isa} = %{EVRD}
+%ifarch %{arm}
+Provides:	cmake-filesystem(armel-32) = %{EVRD}
+%endif
 
 %description
 CMake is used to control the software compilation process using
