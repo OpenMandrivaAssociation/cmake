@@ -62,6 +62,8 @@ class CMakeParser:
            return (modulePath, cfgFile[0:-len("Config.cmake")], False)
         elif cfgFile.endswith("-config.cmake"):
            return (modulePath, cfgFile[0:-len("-config.cmake")], True)
+        elif cfgFile.startswith("Find") and cfgFile.endswith(".cmake"):
+           return (modulePath, cfgFile[len("Find"):-6], False)
         else:
             return (None, None, False)
 
