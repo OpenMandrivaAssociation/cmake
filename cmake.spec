@@ -1,7 +1,6 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 
-# FIXME
-%bcond_without bootstrap
+%bcond_with bootstrap
 
 %define beta %{nil}
 
@@ -12,7 +11,7 @@ Version:	3.11.2
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 Epoch:		1
