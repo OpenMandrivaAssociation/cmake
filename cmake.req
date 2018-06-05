@@ -45,6 +45,18 @@ class CMakeParser:
                 has_module = True
                 if re.match(".*/usr/lib(64)?/cmake/.*", modulePath):
                     is_arched = True
+                # Not perfect, but good enough for (at least most of) KDE Frameworks
+                try:
+                    with open(path, 'r') as fp:
+                        for line in list(fp):
+                            line = line.strip()
+                            if line.split("(")[0].strip() == "find_dependency":
+                                # We could also check for the required version here, but
+                                # since cmake.prov creates unversioned Provides: lines,
+                                # that would be harmful
+                                print("cmake(%s)" % line.split("(")[1].split(")")[0].split(" ")[0])
+                finally:
+                    pass
 
         if has_module:
             if is_arched:
