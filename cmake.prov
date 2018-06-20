@@ -3,6 +3,7 @@
 #
 # Copyright (C) 2015 Daniel Vrátil <dvratil@redhat.com>
 # Copyright (C) 2017 Daniel Vrátil <dvratil@fedoraproject.org>
+# Copyright (C) 2018 Bernhard Rosenkraenzer <bero@lindev.ch>
 #
 #
 # This program is free software; you can redistribute it and/or modify
@@ -47,12 +48,12 @@ class CMakeParser:
 
         modulePath = "%s/cmake/%s" % (paths[0], paths[2])
         cfgFile = paths[3]
-        if cfgFile.endswith("Config.cmake"):
+        if cfgFile.startswith("Find") and cfgFile.endswith(".cmake"):
+           return (modulePath, cfgFile[len("Find"):-6], False)
+        elif cfgFile.endswith("Config.cmake"):
            return (modulePath, cfgFile[0:-len("Config.cmake")], False)
         elif cfgFile.endswith("-config.cmake"):
            return (modulePath, cfgFile[0:-len("-config.cmake")], True)
-        elif cfgFile.startswith("Find") and cfgFile.endswith(".cmake"):
-           return (modulePath, cfgFile[len("Find"):-6], False)
         else:
             return (None, None, False)
 

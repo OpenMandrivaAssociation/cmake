@@ -11,7 +11,7 @@ Version:	3.11.4
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 Epoch:		1
@@ -20,7 +20,10 @@ Group:		Development/Other
 Url:		http://www.cmake.org/HTML/index.html
 Source1:	cmake.macros
 Source2:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.attr
-Source3:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.prov
+# cmake.prov is based on Fedora's versions found at
+# https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.prov
+# And fixed up to handle e.g. cmake(PkgConfig) correctly.
+Source3:	cmake.prov
 # cmake.req is based on Fedora's versions found at
 # https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.req
 # And extended with a simplistic check for KDE Frameworks interdependencies
