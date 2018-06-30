@@ -2,16 +2,16 @@
 
 %bcond_with bootstrap
 
-%define beta %{nil}
+%define beta rc2
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.11.4
+Version:	3.12.0
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	3
+Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 Epoch:		1
