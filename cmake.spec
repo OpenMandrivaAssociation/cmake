@@ -11,7 +11,7 @@ Version:	3.12.1
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 Epoch:		1
@@ -199,6 +199,13 @@ install -m755 %{S:4} -D %{buildroot}%{_rpmconfigdir}/%{name}.req
 # not submitted yet, so we'll just work around this by moving it for now..
 rm -rf mydocs
 mv %{buildroot}%{_datadir}/doc/%{name} mydocs
+
+# FIXME FIXME FIXME FIXME
+# Workaround for libdnf bug
+# https://github.com/rpm-software-management/libdnf/pull/543
+# Need to work around it here because libdnf requires cmake to build...
+# Get rid of this workaround as soon as fixed dnf is deployed in abf.
+rm -rf %{buildroot}%{_datadir}/cmake/Help/generator/*' '*
 
 # As of 2.8.10.2, the test suite needs net access.
 # Absent that, it will fail:
