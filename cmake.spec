@@ -11,10 +11,9 @@ Version:	3.14.0
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
-Epoch:		1
 License:	BSD
 Group:		Development/Other
 Url:		http://www.cmake.org/HTML/index.html
@@ -32,6 +31,7 @@ Source100:	cmake.rpmlintrc
 Patch1:		cmake-3.11.0-pthread-linkage.patch
 Patch2:		cmake-3.9.0-clang-5.0.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
+Patch4:		https://gitlab.kitware.com/cmake/cmake/commit/a3a1e69f8a8.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
 BuildRequires:	pkgconfig(libcurl)
