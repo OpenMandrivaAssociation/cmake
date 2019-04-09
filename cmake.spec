@@ -39,8 +39,9 @@ BuildRequires:	pkgconfig(libuv)
 BuildRequires:	pkgconfig(zlib)
 BuildRequires:	xz
 BuildRequires:	pkgconfig(expat)
-BuildRequires:	bzip2-devel
+BuildRequires:	pkgconfig(bzip2)
 BuildRequires:	pkgconfig(libarchive)
+BuildRequires:	pkgconfig(libzstd)
 %if !%{with bootstrap}
 BuildRequires:	qmake5
 BuildRequires:	pkgconfig(Qt5Gui)
@@ -129,11 +130,10 @@ This is the Qt GUI.
 
 %prep
 %if "%{beta}" != ""
-%setup -qn %{name}-%{version}-%{beta}
+%autosetup -n %{name}-%{version}-%{beta} -p1
 %else
-%setup -q
+%autosetup -p1
 %endif
-%apply_patches
 
 # Don't try to automagically find files in /usr/X11R6
 # But also don't change a prefix if it is not /usr
@@ -164,10 +164,10 @@ cd build
 %endif
     --parallel=%{_smp_mflags}
 
-%make
+%make_build
 
 %install
-%makeinstall_std -C build
+%make_install -C build
 
 # vim syntax highlighting and indentation rules...
 mv %{buildroot}%{_datadir}/cmake/editors/vim %{buildroot}%{_datadir}
