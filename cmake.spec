@@ -1,6 +1,6 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 
-%bcond_without bootstrap
+%bcond_with bootstrap
 
 %define beta rc1
 
@@ -8,7 +8,7 @@ Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.15.0
 %if "%{beta}" != ""
-Release:	0.%{beta}.1
+Release:	0.%{beta}.2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
 Release:	1
