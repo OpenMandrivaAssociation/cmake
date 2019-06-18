@@ -2,11 +2,11 @@
 
 %bcond_with bootstrap
 
-%define beta %{nil}
+%define beta rc1
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.14.5
+Version:	3.15.0
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
@@ -28,7 +28,6 @@ Source3:	cmake.prov
 # And extended with a simplistic check for KDE Frameworks interdependencies
 Source4:	cmake.req
 Source100:	cmake.rpmlintrc
-Patch1:		cmake-3.11.0-pthread-linkage.patch
 Patch2:		cmake-3.9.0-clang-5.0.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 BuildRequires:	perl
