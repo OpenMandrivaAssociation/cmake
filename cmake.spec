@@ -52,6 +52,7 @@ BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(bzip2)
 BuildRequires:	pkgconfig(libarchive)
 BuildRequires:	pkgconfig(libzstd)
+BuildRequires:	cmake(jsoncpp)
 %if %{with bootstrap}
 # We need a copy of ourselves for the cmake(*) dependency generator to work
 # and create all the cmake(*) Provides for the built-in modules
@@ -63,7 +64,6 @@ BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Widgets)
 BuildRequires:	qt5-platformtheme-gtk2
 BuildRequires:	rhash-devel
-BuildRequires:	cmake(jsoncpp)
 # Ensure tests of Qt5Gui's cmake builds don't result in an error
 # because libqdirectfb.so and friends have been "removed" since creating the
 # cmake module
