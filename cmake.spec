@@ -57,7 +57,7 @@ BuildRequires:	pkgconfig(libzstd)
 # and create all the cmake(*) Provides for the built-in modules
 BuildRequires:	cmake
 %endif
-%if !%{with gui}
+%if %{with gui}
 BuildRequires:	qmake5
 BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Widgets)
