@@ -118,7 +118,7 @@ Documentation for %{name}.
 
 #-----------------------------------------------------------------------------
 
-%if !%{with bootstrap}
+%if %{with gui}
 %package -n	%{name}-qtgui
 Summary:	Qt GUI Dialog for CMake - the Cross-platform, open-source make system
 Group:		Development/Other
