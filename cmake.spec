@@ -52,11 +52,11 @@ BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(bzip2)
 BuildRequires:	pkgconfig(libarchive)
 BuildRequires:	pkgconfig(libzstd)
-BuildRequires:	cmake(jsoncpp)
-%if %{with bootstrap}
+%if !%{with bootstrap}
 # We need a copy of ourselves for the cmake(*) dependency generator to work
 # and create all the cmake(*) Provides for the built-in modules
 BuildRequires:	cmake
+BuildRequires:	cmake(jsoncpp)
 %endif
 %if %{with gui}
 BuildRequires:	qmake5
@@ -170,10 +170,11 @@ cd build
     --datadir=/share/%{name} \
     --mandir=/share/man \
     --docdir=/share/doc/%{name} \
-%if !%{with bootstrap}
+%if %{with gui}
     --qt-gui \
     --qt-qmake=%{_bindir}/qmake-qt5 \
-%else
+%endif
+%if %{with bootstrap}
     --no-system-jsoncpp \
     --no-system-librhash \
 %endif
