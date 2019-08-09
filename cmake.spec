@@ -2,16 +2,27 @@
 
 %bcond_with bootstrap
 
+%if %{with bootstrap}
+%bcond_with gui
+%else
+# The RISC-V port doesn't have Qt yet
+%ifarch %{riscv}
+%bcond_with gui
+%else
+%bcond_without gui
+%endif
+%endif
+
 %define beta %{nil}
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.15.2
 %if "%{beta}" != ""
-Release:	1
+Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 License:	BSD
@@ -42,6 +53,11 @@ BuildRequires:	pkgconfig(bzip2)
 BuildRequires:	pkgconfig(libarchive)
 BuildRequires:	pkgconfig(libzstd)
 %if !%{with bootstrap}
+# We need a copy of ourselves for the cmake(*) dependency generator to work
+# and create all the cmake(*) Provides for the built-in modules
+BuildRequires:	cmake
+%endif
+%if !%{with gui}
 BuildRequires:	qmake5
 BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Widgets)
