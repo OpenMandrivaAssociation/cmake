@@ -52,12 +52,12 @@ BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(bzip2)
 BuildRequires:	pkgconfig(libarchive)
 BuildRequires:	pkgconfig(libzstd)
-%if !%{with bootstrap}
+%if %{with bootstrap}
 # We need a copy of ourselves for the cmake(*) dependency generator to work
 # and create all the cmake(*) Provides for the built-in modules
 BuildRequires:	cmake
 %endif
-%if !%{with gui}
+%if %{with gui}
 BuildRequires:	qmake5
 BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Widgets)
