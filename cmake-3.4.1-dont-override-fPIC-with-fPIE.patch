@@ -1,13 +1,13 @@
-diff -up cmake-3.13.0/Source/cmLocalGenerator.cxx.0003~ cmake-3.13.0/Source/cmLocalGenerator.cxx
---- cmake-3.13.0/Source/cmLocalGenerator.cxx.0003~	2018-11-23 23:43:58.493477651 +0100
-+++ cmake-3.13.0/Source/cmLocalGenerator.cxx	2018-11-23 23:47:15.708219133 +0100
-@@ -1873,7 +1873,8 @@ void cmLocalGenerator::AddPositionIndepe
-     flagsVar += "_COMPILE_OPTIONS_PIC";
-     picFlags = this->Makefile->GetSafeDefinition(flagsVar);
+diff -up cmake-3.16.0/Source/cmLocalGenerator.cxx.1~ cmake-3.16.0/Source/cmLocalGenerator.cxx
+--- cmake-3.16.0/Source/cmLocalGenerator.cxx.1~	2019-11-27 02:08:44.285897852 +0100
++++ cmake-3.16.0/Source/cmLocalGenerator.cxx	2019-11-27 02:10:03.873049340 +0100
+@@ -2251,7 +2251,8 @@ void cmLocalGenerator::AddPositionIndepe
+     picFlags = this->Makefile->GetSafeDefinition(
+       cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_PIC"));
    }
 -  if (!picFlags.empty()) {
 +  // Don't allow -fPIE to override -fPIC
 +  if (!picFlags.empty() && flags.find("-fPIC")==std::string::npos) {
-     std::vector<std::string> options;
-     cmSystemTools::ExpandListArgument(picFlags, options);
+     std::vector<std::string> options = cmExpandedList(picFlags);
      for (std::string const& o : options) {
+       this->AppendFlagEscape(flags, o);

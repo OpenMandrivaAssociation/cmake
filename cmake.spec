@@ -17,7 +17,7 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.15.5
+Version:	3.16.0
 %if "%{beta}" != ""
 Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
@@ -39,7 +39,6 @@ Source3:	cmake.prov
 # And extended with a simplistic check for KDE Frameworks interdependencies
 Source4:	cmake.req
 Source100:	cmake.rpmlintrc
-Patch2:		cmake-3.9.0-clang-5.0.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
