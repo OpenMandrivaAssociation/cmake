@@ -11,7 +11,7 @@
 %_cmake_version		%(%{__cmake} --version|sed -e 's#.* \(\S*\)$#\1#g')
 
 %cmake \
-	%setup_compile_flags \
+	%set_build_flags \
 	mkdir -p build \
 	cd build \
 	%define enable_debug 1 \
