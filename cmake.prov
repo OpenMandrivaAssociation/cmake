@@ -24,11 +24,11 @@
 
 import sys
 import re
-import glob
+
 
 class CMakeParser:
-    def __init__(self, filelist = None):
-        if filelist == None:
+    def __init__(self, filelist=None):
+        if filelist is None:
             filelist = sys.stdin
 
         paths = map(lambda x: x.rstrip(), filelist.readlines())
@@ -42,18 +42,17 @@ class CMakeParser:
                 else:
                     print("cmake(%s)" % cmakeModule)
 
-
     def parseCmakeModuleConfig(self, configFile):
         paths = configFile.rsplit("/", 3)
 
         modulePath = "%s/cmake/%s" % (paths[0], paths[2])
         cfgFile = paths[3]
         if cfgFile.startswith("Find") and cfgFile.endswith(".cmake"):
-           return (modulePath, cfgFile[len("Find"):-6], False)
+            return (modulePath, cfgFile[len("Find"):-6], False)
         elif cfgFile.endswith("Config.cmake"):
-           return (modulePath, cfgFile[0:-len("Config.cmake")], False)
+            return (modulePath, cfgFile[0:-len("Config.cmake")], False)
         elif cfgFile.endswith("-config.cmake"):
-           return (modulePath, cfgFile[0:-len("-config.cmake")], True)
+            return (modulePath, cfgFile[0:-len("-config.cmake")], True)
         else:
             return (None, None, False)
 
@@ -61,7 +60,7 @@ class CMakeParser:
         versionFile = ("%s/%s-config-version.cmake" if lowercase else "%s/%sConfigVersion.cmake") % (modulePath, cmakeModule)
         try:
             f = open(versionFile, 'r')
-        except:
+        except IOError:
             return None
 
         for line in f:
@@ -73,6 +72,7 @@ class CMakeParser:
                 return version.groups(1)[0]
 
         return None
+
 
 if __name__ == "__main__":
     parser = CMakeParser()

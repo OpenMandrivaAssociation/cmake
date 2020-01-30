@@ -28,9 +28,10 @@ import sys
 import re
 import subprocess
 
+
 class CMakeParser:
-    def __init__(self, filelist = None):
-        if filelist == None:
+    def __init__(self, filelist=None):
+        if filelist is None:
             filelist = sys.stdin
 
         has_module = False
@@ -64,18 +65,17 @@ class CMakeParser:
             else:
                 print("cmake-filesystem")
 
-
     def parseCmakeModuleConfig(self, configFile):
         paths = configFile.rsplit("/", 3)
 
         modulePath = "%s/cmake/%s" % (paths[0], paths[2])
         cfgFile = paths[3]
         if cfgFile.endswith("Config.cmake"):
-           return (modulePath, cfgFile[0:-len("Config.cmake")], False)
+            return (modulePath, cfgFile[0:-len("Config.cmake")], False)
         elif cfgFile.endswith("-config.cmake"):
-           return (modulePath, cfgFile[0:-len("-config.cmake")], True)
+            return (modulePath, cfgFile[0:-len("-config.cmake")], True)
         elif cfgFile.startswith("Find") and cfgFile.endswith(".cmake"):
-           return (modulePath, cfgFile[len("Find"):-6], False)
+            return (modulePath, cfgFile[len("Find"):-6], False)
         else:
             return (None, None, False)
 
