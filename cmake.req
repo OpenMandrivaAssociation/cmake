@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding:utf-8 -*-
 #
 # Copyright (C) 2017 Björn Esser <besser82@fedoraproject.org>
@@ -55,7 +55,12 @@ class CMakeParser:
                                 # We could also check for the required version here, but
                                 # since cmake.prov creates unversioned Provides: lines,
                                 # that would be harmful
-                                print("cmake(%s)" % line.split("(")[1].split(")")[0].split(" ")[0])
+                                string = "cmake(" + line.split("(")[1].split(")")[0].split(" ")[0] + ")"
+                                # Remove printing original string later and sync with cmake.prov
+                                if string == string.lower():
+                                    print(string.lower())
+                                else:
+                                    print("(" + string.lower() + " or " + string + ")")
                 finally:
                     pass
 
