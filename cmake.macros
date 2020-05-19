@@ -6,7 +6,7 @@
 
 %_cmake_lib_suffix64	-DLIB_SUFFIX=64
 %_cmake_skip_rpath	-DCMAKE_SKIP_RPATH:BOOL=ON
-%_cmake_debug		%{?with_debug:debug}%{?!with_debug:release}
+%_cmake_debug		%{?with_debug:Debug}%{?!with_debug:RelWithDebInfo}
 %_cmake_verbose		%{?with_debug:-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON}%{nil}
 %_cmake_version		%(%{__cmake} --version|sed -e 's#.* \(\S*\)$#\1#g')
 
@@ -46,3 +46,41 @@
 		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-%{ldflags}}" \\\
 		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS:-%{ldflags}}" \\\
 		-DCMAKE_MODULE_LINKER_FLAGS="%(echo ${LDFLAGS:-%{ldflags}}|sed -e 's#-Wl,--no-undefined##')"
+
+%cmake32 \
+	%set_build_flags \
+	mkdir -p build32 \
+	cd build32 \
+	%define enable_debug 1 \
+	%{?_enable_debug: %{expand: %%global enable_debug 1}} \
+	CROSSCOMPILE="" ; \
+%if %{cross_compiling} \
+	CROSSCOMPILE="-DCMAKE_TOOLCHAIN_FILE=\"%_prefix/%_target_platform/share/cmake/%_target_platform.toolchain\" -DCMAKE_CROSSCOMPILING:BOOL=ON" ; \
+%endif \
+	export CROSSCOMPILE ; \
+	CFLAGS32="$(echo ${CFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
+	LDFLAGS32="$(echo ${LDFLAGS:-%{ldflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
+	CC=gcc CXX=g++ \\\
+	PKG_CONFIG_PATH="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG_PATH" \\\
+	%__cmake .. \\\
+		$CROSSCOMPILE \\\
+		%{_cmake_skip_rpath} \\\
+		%{_cmake_verbose} \\\
+		-DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \\\
+		-DCMAKE_INSTALL_LIBDIR:PATH=lib \\\
+		-DLIB_INSTALL_DIR:PATH=lib \\\
+		-DSYSCONF_INSTALL_DIR:PATH=%{_sysconfdir} \\\
+		-DCMAKE_BUILD_TYPE=%{_cmake_debug} \\\
+		%{?_cmake_skip_rpath} \\\
+		%{?_cmake_verbose: -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON} \\\
+		-DBUILD_SHARED_LIBS:BOOL=ON \\\
+		-DBUILD_STATIC_LIBS:BOOL=OFF \\\
+		-DCMAKE_C_FLAGS="${CFLAGS32}" \\\
+		-DCMAKE_C_FLAGS_RELEASE="${CFLAGS32}" \\\
+		-DCMAKE_C_FLAGS_RELWITHDEBINFO="${CFLAGS32}" \\\
+		-DCMAKE_CXX_FLAGS="${CFLAGS32}" \\\
+		-DCMAKE_CXX_FLAGS_RELEASE="${CFLAGS32}" \\\
+		-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="${CFLAGS32}" \\\
+		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS32}" \\\
+		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS32}" \\\
+		-DCMAKE_MODULE_LINKER_FLAGS="%(echo ${LDFLAGS32}|sed -e 's#-Wl,--no-undefined##')"
