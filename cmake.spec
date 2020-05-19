@@ -162,7 +162,7 @@ sed -i -e 's!SET(CMAKE_LONG_TEST_TIMEOUT 1500)!SET(CMAKE_LONG_TEST_TIMEOUT 7200)
 mkdir -p build
 cd build
 %setup_compile_flags
-../configure \
+if ! ../configure \
     --system-libs \
     --prefix=%{_prefix} \
     --datadir=/share/%{name} \
@@ -176,7 +176,10 @@ cd build
     --no-system-jsoncpp \
     --no-system-librhash \
 %endif
-    --parallel=%{_smp_mflags}
+    --parallel=%{_smp_mflags}; then
+	cat Bootstrap.cmk/cmake_bootstrap.log
+	exit 1
+fi
 
 %make_build
 
