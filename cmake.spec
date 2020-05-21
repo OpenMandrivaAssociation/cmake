@@ -78,8 +78,6 @@ Provides:	cmake-filesystem%{?_isa} = %{EVRD}
 %ifarch %{arm}
 Provides:	cmake-filesystem(armel-32) = %{EVRD}
 %endif
-# Temporary hack to make sure libunwind can be linked
-BuildRequires:	llvm-devel
 
 %description
 CMake is used to control the software compilation process using
