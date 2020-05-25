@@ -48,7 +48,6 @@
 		-DCMAKE_MODULE_LINKER_FLAGS="%(echo ${LDFLAGS:-%{ldflags}}|sed -e 's#-Wl,--no-undefined##')"
 
 %cmake32 \
-	%set_build_flags \
 	mkdir -p build32 \
 	cd build32 \
 	%define enable_debug 1 \
@@ -59,6 +58,7 @@
 %endif \
 	export CROSSCOMPILE ; \
 	CFLAGS32="$(echo ${CFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
+	CXXFLAGS32="$(echo ${CXXFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
 	LDFLAGS32="$(echo ${LDFLAGS:-%{ldflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
 	CC=gcc CXX=g++ \\\
 	PKG_CONFIG_PATH="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG_PATH" \\\
@@ -83,4 +83,4 @@
 		-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="${CFLAGS32}" \\\
 		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS32}" \\\
 		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS32}" \\\
-		-DCMAKE_MODULE_LINKER_FLAGS="%(echo ${LDFLAGS32}|sed -e 's#-Wl,--no-undefined##')"
+		-DCMAKE_MODULE_LINKER_FLAGS="${LDFLAGS32/-Wl,--no-undefined/}"
