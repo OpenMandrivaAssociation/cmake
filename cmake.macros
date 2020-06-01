@@ -61,7 +61,8 @@
 	CXXFLAGS32="$(echo ${CXXFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
 	LDFLAGS32="$(echo ${LDFLAGS:-%{ldflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
 	CC=gcc CXX=g++ \\\
-	PKG_CONFIG_PATH="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG_PATH" \\\
+	PKG_CONFIG_LIBDIR="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG32_LIBDIR" \\\
+	PKG_CONFIG_PATH="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG32_PATH" \\\
 	%__cmake .. \\\
 		$CROSSCOMPILE \\\
 		%{_cmake_skip_rpath} \\\
