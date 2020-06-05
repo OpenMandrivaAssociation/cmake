@@ -22,7 +22,7 @@ Version:	3.17.3
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	2
+Release:	3
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 License:	BSD
@@ -39,6 +39,7 @@ Source3:	cmake.prov
 # And extended with a simplistic check for KDE Frameworks interdependencies
 Source4:	cmake.req
 Source100:	cmake.rpmlintrc
+Patch0:		cmake-3.17.3-fix-openssl-3.0-check.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
