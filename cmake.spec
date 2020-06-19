@@ -13,16 +13,16 @@
 %endif
 %endif
 
-%define beta %{nil}
+%define beta rc2
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.17.3
+Version:	3.18.0
 %if "%{beta}" != ""
 Release:	0.%{beta}.1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
 %else
-Release:	4
+Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
 %endif
 License:	BSD
@@ -39,7 +39,6 @@ Source3:	cmake.prov
 # And extended with a simplistic check for KDE Frameworks interdependencies
 Source4:	cmake.req
 Source100:	cmake.rpmlintrc
-Patch0:		cmake-3.17.3-fix-openssl-3.0-check.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
@@ -102,6 +101,7 @@ generation, and template instantiation.
 %{_datadir}/emacs/site-lisp/cmake-mode.el
 %{_datadir}/vim/*/*
 %{_datadir}/aclocal/cmake.m4
+%{_datadir}/bash-completion/completions/*
 
 %package doc
 Summary:	Documentation for %{name}
@@ -187,12 +187,8 @@ fi
 %install
 %make_install -C build
 
-# vim syntax highlighting and indentation rules...
-mv %{buildroot}%{_datadir}/cmake/editors/vim %{buildroot}%{_datadir}
-
 # cmake mode for emacs
-mkdir -p %{buildroot}%{_datadir}/emacs/site-lisp %{buildroot}%{_sysconfdir}/emacs/site-start.d
-mv %{buildroot}%{_datadir}/cmake/editors/emacs/cmake-mode.el %{buildroot}%{_datadir}/emacs/site-lisp/cmake-mode.el
+mkdir -p %{buildroot}%{_sysconfdir}/emacs/site-start.d
 cat <<EOF >%{buildroot}%{_sysconfdir}/emacs/site-start.d/%{name}.el
 (setq load-path (cons (expand-file-name "/dir/with/cmake-mode") load-path))
 (require 'cmake-mode)
@@ -201,10 +197,6 @@ cat <<EOF >%{buildroot}%{_sysconfdir}/emacs/site-start.d/%{name}.el
                 ("\\\\.cmake\\\\'" . cmake-mode))
               auto-mode-alist))
 EOF
-
-# remove directory we just cleared by moving files where editors
-# will actually find them
-rm -rf %{buildroot}%{_datadir}/cmake/editors
 
 # RPM macros and dependency generators
 install -m644 %{S:1} -D %{buildroot}%{_rpmmacrodir}/macros.cmake
