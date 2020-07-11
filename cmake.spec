@@ -13,7 +13,7 @@
 %endif
 %endif
 
-%define beta rc2
+%define beta rc4
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
