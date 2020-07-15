@@ -13,18 +13,13 @@
 %endif
 %endif
 
-%define beta rc4
+#define beta rc1
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.18.0
-%if "%{beta}" != ""
-Release:	0.%{beta}.1
-Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}-%{beta}.tar.gz
-%else
-Release:	1
-Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}.tar.gz
-%endif
+Release:	%{?beta:0.%{beta}.}1
+Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
 Url:		http://www.cmake.org/HTML/index.html
@@ -143,11 +138,7 @@ This is the Qt GUI.
 #-----------------------------------------------------------------------------
 
 %prep
-%if "%{beta}" != ""
-%autosetup -n %{name}-%{version}-%{beta} -p1
-%else
-%autosetup -p1
-%endif
+%autosetup -n %{name}-%{version}%{?beta:-%{beta}} -p1
 
 # Don't try to automagically find files in /usr/X11R6
 # But also don't change a prefix if it is not /usr
