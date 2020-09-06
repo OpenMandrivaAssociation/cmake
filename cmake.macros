@@ -12,8 +12,8 @@
 
 %cmake \
 	%set_build_flags \
-	mkdir -p build \
-	cd build \
+	mkdir -p ${CMAKE_BUILD_DIR:-build} \
+	cd ${CMAKE_BUILD_DIR:-build} \
 	%define enable_debug 1 \
 	%{?_enable_debug: %{expand: %%global enable_debug 1}} \
 	CROSSCOMPILE="" ; \
@@ -48,8 +48,8 @@
 		-DCMAKE_MODULE_LINKER_FLAGS="%(echo ${LDFLAGS:-%{ldflags}}|sed -e 's#-Wl,--no-undefined##')"
 
 %cmake32 \
-	mkdir -p build32 \
-	cd build32 \
+	mkdir -p ${CMAKE_BUILD_DIR32:-build32} \
+	cd ${CMAKE_BUILD_DIR32:-build32} \
 	%define enable_debug 1 \
 	%{?_enable_debug: %{expand: %%global enable_debug 1}} \
 	CROSSCOMPILE="" ; \
