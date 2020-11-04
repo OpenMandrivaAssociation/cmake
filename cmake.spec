@@ -13,12 +13,12 @@
 %endif
 %endif
 
-#define beta rc1
+%define beta rc2
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.18.3
-Release:	1
+Version:	3.19.0
+Release:	%{?beta:0.%{beta}.}1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
