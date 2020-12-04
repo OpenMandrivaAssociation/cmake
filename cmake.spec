@@ -1,6 +1,6 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 
-%bcond_without bootstrap
+%bcond_with bootstrap
 
 %if %{with bootstrap}
 %bcond_with gui
@@ -18,7 +18,7 @@
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.19.1
-Release:	%{?beta:0.%{beta}.}2
+Release:	%{?beta:0.%{beta}.}3
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
