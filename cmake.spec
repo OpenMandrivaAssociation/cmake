@@ -1,6 +1,6 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 
-%bcond_with bootstrap
+%bcond_without bootstrap
 
 %if %{with bootstrap}
 %bcond_with gui
