@@ -27,6 +27,7 @@
 		%{_cmake_verbose} \\\
 		-DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \\\
 		-DCMAKE_INSTALL_LIBDIR:PATH=%{_lib} \\\
+		-DCMAKE_INSTALL_DO_STRIP:BOOL=OFF \\\
 		-DLIB_INSTALL_DIR:PATH=%{_lib} \\\
 		-DSYSCONF_INSTALL_DIR:PATH=%{_sysconfdir} \\\
 		-DCMAKE_BUILD_TYPE=%{_cmake_debug} \\\
@@ -38,14 +39,14 @@
 		-DBUILD_SHARED_LIBS:BOOL=ON \\\
 		-DBUILD_STATIC_LIBS:BOOL=OFF \\\
 		-DCMAKE_C_FLAGS="${CFLAGS:-%{optflags}}" \\\
-		-DCMAKE_C_FLAGS_RELEASE="${CFLAGS:-%{optflags}}" \\\
+		-DCMAKE_C_FLAGS_RELEASE="${CFLAGS:-%{optflags}} -DNDEBUG" \\\
 		-DCMAKE_C_FLAGS_RELWITHDEBINFO="${CFLAGS:-%{optflags}}" \\\
 		-DCMAKE_CXX_FLAGS="${CXXFLAGS:-%{optflags}}" \\\
-		-DCMAKE_CXX_FLAGS_RELEASE="${CXXFLAGS:-%{optflags}}" \\\
+		-DCMAKE_CXX_FLAGS_RELEASE="${CXXFLAGS:-%{optflags}} -DNDEBUG" \\\
 		-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="${CXXFLAGS:-%{optflags}}" \\\
-		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-%{ldflags}}" \\\
-		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS:-%{ldflags}}" \\\
-		-DCMAKE_MODULE_LINKER_FLAGS="%(echo ${LDFLAGS:-%{ldflags}}|sed -e 's#-Wl,--no-undefined##')"
+		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS:-%{build_ldflags}}" \\\
+		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS:-%{build_ldflags}}" \\\
+		-DCMAKE_MODULE_LINKER_FLAGS="%(echo ${LDFLAGS:-%{build_ldflags}}|sed -e 's#-Wl,--no-undefined##')"
 
 %cmake32 \
 	mkdir -p ${CMAKE_BUILD_DIR32:-build32} \
@@ -59,7 +60,7 @@
 	export CROSSCOMPILE ; \
 	CFLAGS32="$(echo ${CFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
 	CXXFLAGS32="$(echo ${CXXFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
-	LDFLAGS32="$(echo ${LDFLAGS:-%{ldflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
+	LDFLAGS32="$(echo ${LDFLAGS:-%{build_ldflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s, -flto,,g') -m32" ; \
 	CC=gcc CXX=g++ \\\
 	PKG_CONFIG_LIBDIR="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG32_LIBDIR" \\\
 	PKG_CONFIG_PATH="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG32_PATH" \\\
@@ -69,6 +70,7 @@
 		%{_cmake_verbose} \\\
 		-DCMAKE_INSTALL_PREFIX:PATH=%{_prefix} \\\
 		-DCMAKE_INSTALL_LIBDIR:PATH=lib \\\
+		-DCMAKE_INSTALL_DO_STRIP:BOOL=OFF \\\
 		-DLIB_INSTALL_DIR:PATH=lib \\\
 		-DSYSCONF_INSTALL_DIR:PATH=%{_sysconfdir} \\\
 		-DCMAKE_BUILD_TYPE=%{_cmake_debug} \\\
@@ -77,10 +79,10 @@
 		-DBUILD_SHARED_LIBS:BOOL=ON \\\
 		-DBUILD_STATIC_LIBS:BOOL=OFF \\\
 		-DCMAKE_C_FLAGS="${CFLAGS32}" \\\
-		-DCMAKE_C_FLAGS_RELEASE="${CFLAGS32}" \\\
+		-DCMAKE_C_FLAGS_RELEASE="${CFLAGS32} -DNDEBUG" \\\
 		-DCMAKE_C_FLAGS_RELWITHDEBINFO="${CFLAGS32}" \\\
 		-DCMAKE_CXX_FLAGS="${CFLAGS32}" \\\
-		-DCMAKE_CXX_FLAGS_RELEASE="${CFLAGS32}" \\\
+		-DCMAKE_CXX_FLAGS_RELEASE="${CFLAGS32} -DNDEBUG" \\\
 		-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="${CFLAGS32}" \\\
 		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS32}" \\\
 		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS32}" \\\
