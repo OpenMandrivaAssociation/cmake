@@ -15,6 +15,11 @@
 
 #define beta %{nil}
 
+%ifarch %{arm}
+# https://gitlab.kitware.com/cmake/cmake/-/issues/20568
+%global optflags %{optflags} -D_FILE_OFFSET_BITS=64
+%endif
+
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.19.2
