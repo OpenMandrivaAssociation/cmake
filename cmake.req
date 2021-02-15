@@ -56,6 +56,12 @@ class CMakeParser:
                                 # since cmake.prov creates unversioned Provides: lines,
                                 # that would be harmful
                                 string = "cmake(" + line.split("(")[1].split(")")[0].split(" ")[0] + ")"
+                                # This stupid script cannot expand constructions like
+                                # for <...> find_dependency($var),
+                                # it result to sth like "Requires: cmake(Qt5${_QT_MODULE}))".
+                                # Just filter such "dependencies" for now.
+                                if string.find('$') != -1:
+                                    continue
                                 # Remove printing original string later and sync with cmake.prov
                                 if string == string.lower():
                                     print(string.lower())
