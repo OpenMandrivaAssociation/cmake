@@ -22,7 +22,7 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.20.2
+Version:	3.20.3
 Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
@@ -158,7 +158,7 @@ sed -i -e 's!SET(CMAKE_LONG_TEST_TIMEOUT 1500)!SET(CMAKE_LONG_TEST_TIMEOUT 7200)
 
 mkdir -p build
 cd build
-%setup_compile_flags
+%set_build_flags
 if ! ../configure \
     --system-libs \
     --prefix=%{_prefix} \
