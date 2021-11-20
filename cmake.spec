@@ -13,7 +13,7 @@
 %endif
 %endif
 
-%define beta rc3
+#define beta rc3
 
 %ifarch %{arm}
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20568
