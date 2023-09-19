@@ -1,0 +1,3 @@
+%__cmake_provides	%{_rpmconfigdir}/cmake.prov
+%__cmake_requires	%{_rpmconfigdir}/cmake.req
+%__cmake_path		^((%{_libdir}|%{_datadir})/cmake/.*/|%{_datadir}/ECM/cmake/|%{_datadir}/ECM/find-modules/|%{_libdir}/qt6/lib/cmake/)(.*(Config|-config)|Find.*)\.cmake$

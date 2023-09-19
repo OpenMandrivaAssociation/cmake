@@ -1,0 +1,24 @@
+From bfd04106187a46bdb386d9d189259c7b492f31fe Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Nicolas=20L=C3=A9cureuil?= <neoclust.kde@free.fr>
+Date: Sat, 27 Oct 2012 02:06:21 +0200
+Subject: [PATCH 1/3] Fix FLTK Find path
+
+---
+ Modules/FindFLTK.cmake | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Modules/FindFLTK.cmake b/Modules/FindFLTK.cmake
+index 0611cf0..fbb1183 100644
+--- a/Modules/FindFLTK.cmake
++++ b/Modules/FindFLTK.cmake
+@@ -101,6 +101,7 @@ if(NOT FLTK_DIR)
+ 
+     PATHS
+     # Look in standard UNIX install locations.
++    /usr/lib/FLTK-1.1
+     /usr/local/lib/fltk
+     /usr/lib/fltk
+     /usr/local/fltk
+-- 
+1.8.0
+

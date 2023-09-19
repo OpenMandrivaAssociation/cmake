@@ -1,0 +1,12 @@
+diff -up cmake-3.27.0/Source/cmLocalGenerator.cxx.3~ cmake-3.27.0/Source/cmLocalGenerator.cxx
+--- cmake-3.27.0/Source/cmLocalGenerator.cxx.3~	2023-07-19 20:43:51.894306183 +0200
++++ cmake-3.27.0/Source/cmLocalGenerator.cxx	2023-07-19 22:24:43.277356004 +0200
+@@ -2378,7 +2378,7 @@ void cmLocalGenerator::AddCMP0018Flags(s
+     this->AddSharedFlags(flags, lang, shared);
+   } else {
+     if (target->GetLinkInterfaceDependentBoolProperty(
+-          "POSITION_INDEPENDENT_CODE", config)) {
++          "POSITION_INDEPENDENT_CODE", config) && (flags.find("-fPIC") == std::string::npos)) {
+       this->AddPositionIndependentFlags(flags, lang, targetType);
+     }
+     if (shared) {

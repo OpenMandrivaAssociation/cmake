@@ -1,0 +1,16 @@
+diff -up cmake-3.24.0-rc2/Source/cmFindCommon.cxx.omv~ cmake-3.24.0-rc2/Source/cmFindCommon.cxx
+--- cmake-3.24.0-rc2/Source/cmFindCommon.cxx.omv~	2022-07-06 18:31:11.736163068 +0200
++++ cmake-3.24.0-rc2/Source/cmFindCommon.cxx	2022-07-06 18:32:44.904798044 +0200
+@@ -428,6 +428,12 @@ void cmFindCommon::ComputeFinalPaths(Ign
+                                          this->SearchPaths);
+   }
+ 
++  // Add Qt6 paths
++  std::vector<std::string> qt6Modules;
++  cmSystemTools::GlobDirs("@QT6DIR@/lib/cmake/*", qt6Modules);
++  for(std::string const &q6m : qt6Modules)
++    this->SearchPaths.push_back(q6m);
++
+   // Expand list of paths inside all search roots.
+   this->RerootPaths(this->SearchPaths);
+ 

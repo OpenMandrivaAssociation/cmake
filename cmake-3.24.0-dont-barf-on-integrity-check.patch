@@ -1,0 +1,27 @@
+diff -up cmake-3.24.0/Source/cmExportFileGenerator.cxx.omv~ cmake-3.24.0/Source/cmExportFileGenerator.cxx
+--- cmake-3.24.0/Source/cmExportFileGenerator.cxx.omv~	2022-08-26 02:23:44.926699804 +0200
++++ cmake-3.24.0/Source/cmExportFileGenerator.cxx	2022-08-26 02:27:37.616449505 +0200
+@@ -1183,7 +1183,7 @@ void cmExportFileGenerator::GenerateImpo
+         "foreach(_cmake_target IN LISTS _cmake_import_check_targets)\n"
+         "  foreach(_cmake_file IN LISTS \"_cmake_import_check_files_for_${_cmake_target}\")\n"
+         "    if(NOT EXISTS \"${_cmake_file}\")\n"
+-        "      message(FATAL_ERROR \"The imported target \\\"${_cmake_target}\\\""
++        "      message(WARNING \"The imported target \\\"${_cmake_target}\\\""
+         " references the file\n"
+         "   \\\"${_cmake_file}\\\"\n"
+         "but this file does not exist.  Possible reasons include:\n"
+@@ -1192,6 +1192,14 @@ void cmExportFileGenerator::GenerateImpo
+         "* The installation package was faulty and contained\n"
+         "   \\\"${CMAKE_CURRENT_LIST_FILE}\\\"\n"
+         "but not all the files it references.\n"
++	"* The installation package was intentionally split into smaller\n"
++	"  components, and \\\"${_cmake_file}\\\"\n"
++	"  is part of an optional subpackage. This is generally harmless\n"
++	"  and known to happen on e.g. the static libraries when only\n"
++	"  shared libraries are being used - but if you see an actual\n"
++	"  error after seeing this message, you might want to make sure\n"
++	"  the optional file is installed by running\n"
++	"  sudo dnf --refresh install \\\"${_cmake_file}\\\"\n"
+         "\")\n"
+         "    endif()\n"
+         "  endforeach()\n"
