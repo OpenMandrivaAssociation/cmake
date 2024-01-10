@@ -19,7 +19,9 @@
 	CROSSCOMPILE="" ; \
 %ifnarch noarch \
 %if %{cross_compiling} \
-	CROSSCOMPILE="-DCMAKE_TOOLCHAIN_FILE=\"%{_datadir}/cmake/toolchains/%{_target_platform}%{?prefer_gcc:-gcc}.toolchain\" -DCMAKE_CROSSCOMPILING:BOOL=ON" ; \
+	PKG_CONFIG_LIBDIR="%{_prefix}/%{_target_platform}/%{_lib}/pkgconfig:%{_prefix}/%{_target_platform}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG_LIBDIR" \\\
+	PKG_CONFIG_PATH="%{_prefix}/%{_target_platform}/%{_lib}/pkgconfig:%{_prefix}/%{_target_platform}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG_PATH" \\\
+	CROSSCOMPILE="-DCMAKE_TOOLCHAIN_FILE=\"%{_datadir}/cmake/toolchains/%{_target_platform}%{?prefer_gcc:-gcc}.toolchain\" -DCMAKE_CROSSCOMPILING:BOOL=ON -DPKG_CONFIG_EXECUTABLE=%{_bindir}/pkg-config -DPYTHON_EXECUTABLE=%{_bindir}/python -DPython3_EXECUTABLE=%{_bindir}/python" ; \
 %endif \
 %endif \
 	export CROSSCOMPILE ; \
@@ -60,7 +62,7 @@
 	CROSSCOMPILE="" ; \
 %ifnarch noarch \
 %if %{cross_compiling} \
-	CROSSCOMPILE="-DCMAKE_TOOLCHAIN_FILE=\"%_prefix/%_target_platform/share/cmake/%_target_platform.toolchain\" -DCMAKE_CROSSCOMPILING:BOOL=ON" ; \
+	CROSSCOMPILE="-DCMAKE_TOOLCHAIN_FILE=\"%_prefix/%_target_platform/share/cmake/%_target_platform.toolchain\" -DCMAKE_CROSSCOMPILING:BOOL=ON -DPKG_CONFIG_EXECUTABLE=%{_bindir}/pkg-config -DPYTHON_EXECUTABLE=%{_bindir}/python -DPython3_EXECUTABLE=%{_bindir}/python" ; \
 %endif \
 %endif \
 	export CROSSCOMPILE ; \
