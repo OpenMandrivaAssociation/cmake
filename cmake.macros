@@ -69,7 +69,6 @@
 	[ -z "$CFLAGS32"] && CFLAGS32="$(echo ${CFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s,^-m64 ,,;s,^-mx32 ,,;s, -flto,,g') -m32" ; \
 	[ -z "$CXXFLAGS32"] && CXXFLAGS32="$(echo ${CXXFLAGS:-%{optflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s,^-m64 ,,;s,^-mx32 ,,;s, -flto,,g') -m32" ; \
 	[ -z "$LDFLAGS32"] && LDFLAGS32="$(echo ${LDFLAGS:-%{build_ldflags}} | sed -e 's, -m64,,g;s, -mx32,,g;s,^-m64 ,,;s,^-mx32 ,,;s, -flto,,g') -m32" ; \
-	CC=gcc CXX=g++ \\\
 	PKG_CONFIG_LIBDIR="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG32_LIBDIR" \\\
 	PKG_CONFIG_PATH="%{_prefix}/lib/pkgconfig:%{_datadir}/pkgconfig:$PKG_CONFIG32_PATH" \\\
 	%__cmake .. \\\
@@ -96,3 +95,71 @@
 		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS32}" \\\
 		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS32}" \\\
 		-DCMAKE_MODULE_LINKER_FLAGS="${LDFLAGS32/-Wl,--no-undefined/}"
+
+#==============================================================================
+# Spec file fragments for declarative builds with
+# BuildSystem: cmake
+
+%buildsystem_cmake_generate_buildrequires() \
+	echo 'cmake' \
+	echo 'ninja'
+
+%buildsystem_cmake_conf() \
+	CMAKE_BUILD_DIR=_OMV_rpm_build \
+	CMAKE_GENERATOR="" \
+	EXTRA_ARGS="" \
+	ARG_IS_GENERATOR=false \
+	for i in %*; do \
+		if $ARG_IS_GENERATOR; then \
+			CMAKE_GENERATOR="$i" \
+			break \
+		elif [ "$i" = "-G" ]; then \
+			ARG_IS_GENERATOR=true \
+		fi \
+	done \
+	if [ -z "$CMAKE_GENERATOR" ]; then \
+		CMAKE_GENERATOR=Ninja \
+		EXTRA_ARGS="$EXTRA_ARGS -G Ninja" \
+	fi \
+	%cmake %* $EXTRA_ARGS \
+	echo "CMAKE_GENERATOR='$CMAKE_GENERATOR'" >.vars \
+	cd .. \
+%if %{with compat32} \
+	CMAKE_BUILD_DIR32=_OMV_rpm_build32 \
+	%cmake32 %* $EXTRA_ARGS \
+	cd .. \
+%endif
+
+%buildsystem_cmake_build() \
+	[ -e _OMV_rpm_build/.vars ] && source ./_OMV_rpm_build/.vars \
+	case "$CMAKE_GENERATOR" in \
+	Ninja) \
+%if %{with compat32} \
+		%ninja_build -C _OMV_rpm_build32 \
+%endif \
+		%ninja_build -C _OMV_rpm_build \
+		;; \
+	*) \
+%if %{with compat32} \
+		%make_build -C _OMV_rpm_build32 \
+%endif \
+		%make_build -C _OMV_rpm_build \
+		;; \
+	esac
+
+%buildsystem_cmake_install() \
+	[ -e _OMV_rpm_build/.vars ] && source ./_OMV_rpm_build/.vars \
+	case "$CMAKE_GENERATOR" in \
+	Ninja) \
+%if %{with compat32} \
+		%ninja_install -C _OMV_rpm_build32 \
+%endif \
+		%ninja_install -C _OMV_rpm_build \
+		;; \
+	*) \
+%if %{with compat32} \
+		%make_install -C _OMV_rpm_build32 \
+%endif \
+		%make_install -C _OMV_rpm_build \
+		;; \
+	esac

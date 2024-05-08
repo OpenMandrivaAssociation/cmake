@@ -38,7 +38,7 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.29.2
+Version:	3.29.3
 Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
@@ -121,7 +121,7 @@ generation, and template instantiation.
 %{_bindir}/cpack
 %{_datadir}/%{name}
 %{_sysconfdir}/emacs/site-start.d/%{name}.el
-%{_rpmmacrodir}/macros.cmake
+%{_rpmmacrodir}/macros.buildsys.cmake
 %{_rpmconfigdir}/fileattrs/%{name}.attr
 %{_rpmconfigdir}/%{name}.*
 %{_datadir}/emacs/site-lisp/cmake-mode.el
@@ -297,7 +297,7 @@ EOF
 done
 
 # RPM macros and dependency generators
-install -m644 %{S:1} -D %{buildroot}%{_rpmmacrodir}/macros.cmake
+install -m644 %{S:1} -D %{buildroot}%{_rpmmacrodir}/macros.buildsys.cmake
 install -m644 %{S:2} -D %{buildroot}%{_rpmconfigdir}/fileattrs/%{name}.attr
 install -m755 %{S:3} -D %{buildroot}%{_rpmconfigdir}/%{name}.prov
 install -m755 %{S:4} -D %{buildroot}%{_rpmconfigdir}/%{name}.req
