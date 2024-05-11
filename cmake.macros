@@ -14,8 +14,6 @@
 	%set_build_flags \
 	mkdir -p ${CMAKE_BUILD_DIR:-build} \
 	cd ${CMAKE_BUILD_DIR:-build} \
-	%define enable_debug 1 \
-	%{?_enable_debug: %{expand: %%global enable_debug 1}} \
 	CROSSCOMPILE="" ; \
 %ifnarch noarch \
 %if %{cross_compiling} \
@@ -58,8 +56,6 @@
 %cmake32 \
 	mkdir -p ${CMAKE_BUILD_DIR32:-build32} \
 	cd ${CMAKE_BUILD_DIR32:-build32} \
-	%define enable_debug 1 \
-	%{?_enable_debug: %{expand: %%global enable_debug 1}} \
 	CROSSCOMPILE="" ; \
 %ifnarch noarch \
 %if %{cross_compiling} \
