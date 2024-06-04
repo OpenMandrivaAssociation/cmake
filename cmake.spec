@@ -38,8 +38,8 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.29.3
-Release:	2
+Version:	3.29.4
+Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
