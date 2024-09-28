@@ -1,0 +1,25 @@
+diff -up cmake-3.30.4/Source/cmGeneratorTarget_IncludeDirectories.cxx.omv~ cmake-3.30.4/Source/cmGeneratorTarget_IncludeDirectories.cxx
+--- cmake-3.30.4/Source/cmGeneratorTarget_IncludeDirectories.cxx.omv~	2024-09-28 22:21:39.306659530 +0200
++++ cmake-3.30.4/Source/cmGeneratorTarget_IncludeDirectories.cxx	2024-09-28 22:24:20.848345317 +0200
+@@ -155,7 +155,7 @@ void processIncludeDirectories(cmGenerat
+     for (std::string& entryInclude : entry.Values) {
+       if (fromImported && !cmSystemTools::FileExists(entryInclude)) {
+         std::ostringstream e;
+-        MessageType messageType = MessageType::FATAL_ERROR;
++        MessageType messageType = MessageType::AUTHOR_WARNING;
+         if (checkCMP0027) {
+           switch (tgt->GetPolicyStatusCMP0027()) {
+             case cmPolicies::WARN:
+@@ -179,7 +179,11 @@ void processIncludeDirectories(cmGenerat
+              "* An install or uninstall procedure did not complete "
+              "successfully.\n"
+              "* The installation package was faulty and references files it "
+-             "does not provide.\n";
++             "does not provide.\n"
++	     "* The installation package has intentionally been split into "
++	     "several subpackages, and you haven't installed the one "
++	     "containing " << entryInclude << ". This package may or "
++	     "may not be required to build this package.\n";
+         /* clang-format on */
+         tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
+         return;

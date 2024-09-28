@@ -39,7 +39,7 @@
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.30.4
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
@@ -64,6 +64,8 @@ Patch0:		cmake-3.23.2-qt6-searchpath.patch
 # when QtGui is being used without needing any styles.
 # Turn the fatal error into a warning.
 Patch1:		cmake-3.24.0-dont-barf-on-integrity-check.patch
+# Similar check for a missing directory referenced as include path
+Patch2:		cmake-3.30.4-dont-barf-on-missing-directory.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
