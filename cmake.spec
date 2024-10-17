@@ -43,7 +43,7 @@ Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
-Url:		http://www.cmake.org/HTML/index.html
+Url:		https://www.cmake.org/HTML/index.html
 Source1:	cmake.macros
 Source2:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.attr
 # cmake.prov is based on Fedora's versions found at
