@@ -1,7 +1,7 @@
-diff -up cmake-3.29.2/Source/cmExportFileGenerator.cxx.2~ cmake-3.29.2/Source/cmExportFileGenerator.cxx
---- cmake-3.29.2/Source/cmExportFileGenerator.cxx.2~	2024-04-21 12:43:54.368256893 +0200
-+++ cmake-3.29.2/Source/cmExportFileGenerator.cxx	2024-04-21 12:45:33.561357717 +0200
-@@ -1339,7 +1339,7 @@ void cmExportFileGenerator::GenerateImpo
+diff -up cmake-3.31.0/Source/cmExportCMakeConfigGenerator.cxx.2~ cmake-3.31.0/Source/cmExportCMakeConfigGenerator.cxx
+--- cmake-3.31.0/Source/cmExportCMakeConfigGenerator.cxx.2~	2024-11-21 19:47:38.928715540 +0100
++++ cmake-3.31.0/Source/cmExportCMakeConfigGenerator.cxx	2024-11-21 19:48:40.179214936 +0100
+@@ -540,7 +540,7 @@ void cmExportCMakeConfigGenerator::Gener
          "    foreach(_cmake_file IN LISTS "
          "\"_cmake_import_check_files_for_${_cmake_target}\")\n"
          "      if(NOT EXISTS \"${_cmake_file}\")\n"
@@ -10,18 +10,19 @@ diff -up cmake-3.29.2/Source/cmExportFileGenerator.cxx.2~ cmake-3.29.2/Source/cm
          "\\\"${_cmake_target}\\\" references the file\n"
          "   \\\"${_cmake_file}\\\"\n"
          "but this file does not exist.  Possible reasons include:\n"
-@@ -1348,6 +1348,14 @@ void cmExportFileGenerator::GenerateImpo
+@@ -549,6 +549,14 @@ void cmExportCMakeConfigGenerator::Gener
          "* The installation package was faulty and contained\n"
          "   \\\"${CMAKE_CURRENT_LIST_FILE}\\\"\n"
          "but not all the files it references.\n"
-+	"* The installation package was intentionally split into smaller\n"
-+	"  components, and \\\"${_cmake_file}\\\"\n"
-+	"  is part of an optional subpackage. This is generally harmless\n"
-+	"  and known to happen on e.g. the static libraries when only\n"
-+	"  shared libraries are being used - but if you see an actual\n"
-+	"  error after seeing this message, you might want to make sure\n"
-+	"  the optional file is installed by running\n"
-+	"  sudo dnf --refresh install \\\"${_cmake_file}\\\"\n"
++        "* The installation package was intentionally split into smaller\n"
++        "  components, and \\\"${_cmake_file}\\\"\n"
++        "  is part of an optional subpackage. This is generally harmless\n"
++        "  and known to happen on e.g. the static libraries when only\n"
++        "  shared libraries are being used - but if you see an actual\n"
++        "  error after seeing this message, you might want to make sure\n"
++        "  the optional file is installed by running\n"
++        "  sudo dnf --refresh install \\\"${_cmake_file}\\\"\n"
          "\")\n"
          "      endif()\n"
          "    endforeach()\n"
+diff -up cmake-3.31.0/Source/cmExportFileGenerator.cxx.2~ cmake-3.31.0/Source/cmExportFileGenerator.cxx
