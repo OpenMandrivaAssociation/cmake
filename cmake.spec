@@ -1,6 +1,6 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 
-%bcond_with bootstrap
+%bcond_without bootstrap
 
 # Keep this in sync with the list of cross tools we build
 # in other packages (binutils, gcc, ...)
@@ -39,7 +39,7 @@
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	3.31.4
-Release:	1
+Release:	2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
@@ -86,17 +86,9 @@ BuildRequires:	cmake(jsoncpp)
 BuildRequires:	cmake(cppdap)
 %endif
 %if %{with gui}
-BuildRequires:	qmake5
-BuildRequires:	pkgconfig(Qt5Gui)
-BuildRequires:	pkgconfig(Qt5Widgets)
-BuildRequires:	qt5-platformtheme-gtk2
-# Ensure tests of Qt5Gui's cmake builds don't result in an error
-# because libqdirectfb.so and friends have been "removed" since creating the
-# cmake module
-BuildRequires:	%{mklibname qt5gui 5}-offscreen
-BuildRequires:	%{mklibname qt5gui 5}-x11
-BuildRequires:	%{mklibname qt5gui 5}-linuxfb
-BuildRequires:	%{mklibname qt5gui 5}-minimal
+BuildRequires:	qmake-qt6
+BuildRequires:	pkgconfig(Qt6Gui)
+BuildRequires:	pkgconfig(Qt6Widgets)
 %endif
 BuildRequires:	rhash-devel
 BuildRequires:	gcc-gfortran
@@ -205,7 +197,7 @@ if ! ../configure \
 	--docdir=/share/doc/%{name} \
 %if %{with gui}
 	--qt-gui \
-	--qt-qmake=%{_bindir}/qmake-qt5 \
+	--qt-qmake=%{_libdir}/qt6/bin/qmake \
 %endif
 %if %{with bootstrap}
 	--no-system-jsoncpp \
