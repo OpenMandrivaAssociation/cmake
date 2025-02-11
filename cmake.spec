@@ -200,6 +200,7 @@ if ! ../configure \
 	--qt-qmake=%{_libdir}/qt6/bin/qmake \
 %endif
 %if %{with bootstrap}
+	--no-system-libs \
 	--no-system-jsoncpp \
 	--no-system-librhash \
 %endif
