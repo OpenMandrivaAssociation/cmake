@@ -1,6 +1,6 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 
-%bcond_without bootstrap
+%bcond_with bootstrap
 
 # Keep this in sync with the list of cross tools we build
 # in other packages (binutils, gcc, ...)
@@ -38,8 +38,8 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	3.31.4
-Release:	2
+Version:	3.31.5
+Release:	1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
