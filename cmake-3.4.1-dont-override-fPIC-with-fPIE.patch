@@ -1,12 +1,12 @@
-diff -up cmake-3.27.0/Source/cmLocalGenerator.cxx.3~ cmake-3.27.0/Source/cmLocalGenerator.cxx
---- cmake-3.27.0/Source/cmLocalGenerator.cxx.3~	2023-07-19 20:43:51.894306183 +0200
-+++ cmake-3.27.0/Source/cmLocalGenerator.cxx	2023-07-19 22:24:43.277356004 +0200
-@@ -2378,7 +2378,7 @@ void cmLocalGenerator::AddCMP0018Flags(s
-     this->AddSharedFlags(flags, lang, shared);
-   } else {
-     if (target->GetLinkInterfaceDependentBoolProperty(
--          "POSITION_INDEPENDENT_CODE", config)) {
-+          "POSITION_INDEPENDENT_CODE", config) && (flags.find("-fPIC") == std::string::npos)) {
-       this->AddPositionIndependentFlags(flags, lang, targetType);
-     }
-     if (shared) {
+diff -up cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx.4~ cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx
+--- cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx.4~	2025-03-17 13:55:17.850090427 +0100
++++ cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx	2025-03-17 13:56:34.624192288 +0100
+@@ -2508,7 +2508,7 @@ void cmLocalGenerator::AddFeatureFlags(s
+                  (targetType == cmStateEnums::MODULE_LIBRARY));
+ 
+   if (target->GetLinkInterfaceDependentBoolProperty(
+-        "POSITION_INDEPENDENT_CODE", config)) {
++        "POSITION_INDEPENDENT_CODE", config) && (flags.find("-fPIC") == std::string::npos)) {
+     this->AddPositionIndependentFlags(flags, lang, targetType);
+   }
+   if (shared) {
