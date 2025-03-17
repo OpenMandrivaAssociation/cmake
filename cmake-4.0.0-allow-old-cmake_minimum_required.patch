@@ -1,0 +1,22 @@
+diff -up cmake-4.0.0-rc4/Source/cmPolicies.cxx.omv~ cmake-4.0.0-rc4/Source/cmPolicies.cxx
+--- cmake-4.0.0-rc4/Source/cmPolicies.cxx.omv~	2025-03-17 23:49:11.227392453 +0100
++++ cmake-4.0.0-rc4/Source/cmPolicies.cxx	2025-03-17 23:50:40.742653139 +0100
+@@ -328,13 +328,14 @@ bool cmPolicies::ApplyPolicyVersion(cmMa
+       minorVer = 5;
+       patchVer = 0;
+     } else {
+-      mf->IssueMessage(MessageType::FATAL_ERROR,
++      mf->IssueMessage(MessageType::DEPRECATION_WARNING,
+                        "Compatibility with CMake < 3.5 has been removed "
+                        "from CMake.\n" ADVICE_UPDATE_VERSION_ARGUMENT "\n"
+-                       "Or, add -DCMAKE_POLICY_VERSION_MINIMUM=3.5 to try "
++                       "Assuming -DCMAKE_POLICY_VERSION_MINIMUM=3.5 and "
+                        "configuring anyway.");
+-      cmSystemTools::SetFatalErrorOccurred();
+-      return false;
++      majorVer = 3;
++      minorVer = 5;
++      patchVer = 0;
+     }
+   } else if (majorVer == 3 && minorVer < 10 && warnCompat == WarnCompat::On) {
+     // Warn about policy versions for which support will be removed.

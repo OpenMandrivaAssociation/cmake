@@ -39,7 +39,7 @@
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	4.0.0
-Release:	%{?beta:0.%{beta}.}1
+Release:	%{?beta:0.%{beta}.}2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
@@ -67,6 +67,10 @@ Patch1:		cmake-3.24.0-dont-barf-on-integrity-check.patch
 # Similar check for a missing directory referenced as include path
 Patch2:		cmake-3.30.4-dont-barf-on-missing-directory.patch
 Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
+# Don't throw a fatal error on
+# cmake_minimum_required(VERSION something.before.3.5)
+# This would currently break hundreds of packages
+Patch4:		cmake-4.0.0-allow-old-cmake_minimum_required.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
 BuildRequires:	pkgconfig(libcurl)
