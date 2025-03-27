@@ -24,7 +24,7 @@
 %endif
 %endif
 
-%define beta rc5
+#define beta rc5
 
 %ifarch %{arm}
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20568
