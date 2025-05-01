@@ -162,4 +162,4 @@
 		%make_install -C _OMV_rpm_build \
 		;; \
 	esac \
-	%find_lang %{name} --all-name --with-qt --with-html || :
+	%find_lang %{name} --all-name --with-qt --with-html --with-man || :
