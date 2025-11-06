@@ -39,7 +39,7 @@
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	4.1.2
-Release:	%{?beta:0.%{beta}.}1
+Release:	%{?beta:0.%{beta}.}2
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
@@ -81,6 +81,7 @@ BuildRequires:	xz
 BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(bzip2)
 BuildRequires:	pkgconfig(libarchive)
+BuildRequires:	python-sphinx
 %if !%{with bootstrap}
 # We need a copy of ourselves for the cmake(*) dependency generator to work
 # and create all the cmake(*) Provides for the built-in modules
@@ -141,6 +142,8 @@ Documentation for %{name}.
 %if ! %{cross_compiling}
 %doc mydocs/*
 %endif
+%doc %{_mandir}/man1/*.1.*
+%doc %{_mandir}/man7/*.7.*
 
 #-----------------------------------------------------------------------------
 
@@ -188,7 +191,8 @@ sed -i -e 's!SET(CMAKE_LONG_TEST_TIMEOUT 1500)!SET(CMAKE_LONG_TEST_TIMEOUT 7200)
 %cmake \
 	-DCMAKE_DATA_DIR=share/cmake \
 	-DCMAKE_MAN_DIR=share/man \
-	-DCMAKE_DOC_DIR=share/doc/cmake
+	-DCMAKE_DOC_DIR=share/doc/cmake \
+	-DSPHINX_MAN=ON
 %else
 mkdir -p build
 cd build
@@ -203,6 +207,7 @@ if ! ../configure \
 	--qt-gui \
 	--qt-qmake=%{_libdir}/qt6/bin/qmake \
 %endif
+	--sphinx-man \
 %if %{with bootstrap}
 	--no-system-libs \
 	--no-system-jsoncpp \
