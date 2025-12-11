@@ -81,6 +81,7 @@ BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(bzip2)
 BuildRequires:	pkgconfig(libarchive)
 BuildRequires:	python-sphinx
+BuildRequires:	make
 %if !%{with bootstrap}
 # We need a copy of ourselves for the cmake(*) dependency generator to work
 # and create all the cmake(*) Provides for the built-in modules
