@@ -38,23 +38,22 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	4.2.0
+Version:	4.2.1
 Release:	%{?beta:0.%{beta}.}1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
 Url:		https://www.cmake.org/HTML/index.html
-Source1:	cmake.macros
-Source2:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.attr
+Source1:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.attr
 # cmake.prov is based on Fedora's versions found at
 # https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.prov
 # And fixed up to handle e.g. cmake(PkgConfig) correctly.
-Source3:	cmake.prov
+Source2:	cmake.prov
 # cmake.req is based on Fedora's versions found at
 # https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.req
 # And extended with a simplistic check for KDE Frameworks interdependencies
 # Also, we drop the cmake-filesystem requirement (which is a non-issue in OM)
-Source4:	cmake.req
+Source3:	cmake.req
 Source100:	cmake.rpmlintrc
 Patch0:		cmake-3.23.2-qt6-searchpath.patch
 # cmake export files include an "integrity check" to make sure all related
@@ -120,7 +119,6 @@ generation, and template instantiation.
 %{_bindir}/cpack
 %{_datadir}/%{name}
 %{_sysconfdir}/emacs/site-start.d/%{name}.el
-%{_rpmmacrodir}/macros.buildsys.cmake
 %{_rpmconfigdir}/fileattrs/%{name}.attr
 %{_rpmconfigdir}/%{name}.*
 %{_datadir}/emacs/site-lisp/cmake-mode.el
@@ -300,11 +298,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 EOF
 done
 
-# RPM macros and dependency generators
-install -m644 %{S:1} -D %{buildroot}%{_rpmmacrodir}/macros.buildsys.cmake
-install -m644 %{S:2} -D %{buildroot}%{_rpmconfigdir}/fileattrs/%{name}.attr
-install -m755 %{S:3} -D %{buildroot}%{_rpmconfigdir}/%{name}.prov
-install -m755 %{S:4} -D %{buildroot}%{_rpmconfigdir}/%{name}.req
+# RPM dependency generators
+install -m644 %{S:1} -D %{buildroot}%{_rpmconfigdir}/fileattrs/%{name}.attr
+install -m755 %{S:2} -D %{buildroot}%{_rpmconfigdir}/%{name}.prov
+install -m755 %{S:3} -D %{buildroot}%{_rpmconfigdir}/%{name}.req
 
 # %doc wipes out files in doc dir, fixed in cooker svn for rpm package, though
 # not submitted yet, so we'll just work around this by moving it for now..
