@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 # -*- coding:utf-8 -*-
 #
+# Copyright (C) 2026 Bernhard Rosenkränzer <bero@lindev.ch>
+#
+# based on Fedora's cmake.prov
 # Copyright (C) 2017 Björn Esser <besser82@fedoraproject.org>
 #
 # based on cmake.prov, which is
@@ -34,38 +37,61 @@ class CMakeParser:
         if filelist is None:
             filelist = sys.stdin
 
-        has_module = False
-        is_arched = False
-
-        paths = map(lambda x: x.rstrip(), filelist.readlines())
+        paths = [x.rstrip() for x in filelist.readlines()]
         for path in paths:
             modulePath, cmakeModule, lowercase = self.parseCmakeModuleConfig(path)
             if modulePath and cmakeModule:
-                has_module = True
-                if re.match(".*/usr/lib(64)?/cmake/.*", modulePath):
-                    is_arched = True
-                # Not perfect, but good enough for (at least most of) KDE Frameworks
                 try:
                     with open(path, 'r') as fp:
-                        for line in list(fp):
-                            line = line.strip()
-                            if line.split("(")[0].strip() == "find_dependency":
-                                # We could also check for the required version here, but
-                                # since cmake.prov creates unversioned Provides: lines,
-                                # that would be harmful
-                                string = "cmake(" + line.split("(")[1].split(")")[0].split(" ")[0] + ")"
-                                # This stupid script cannot expand constructions like
-                                # for <...> find_dependency($var),
-                                # it result to sth like "Requires: cmake(Qt5${_QT_MODULE}))".
-                                # Just filter such "dependencies" for now.
-                                if string.find('$') != -1:
-                                    continue
-                                # Remove printing original string later and sync with cmake.prov
-                                if string == string.lower():
-                                    print(string.lower())
-                                else:
-                                    print("(" + string.lower() + " or " + string + ")")
-                finally:
+                        content = fp.read()
+
+                        # 1. Safe comment stripping
+                        content = re.sub(r'#.*', '', content)
+
+                        # 2. Extract find_dependency/find_package block contents
+                        # This regex captures everything inside the parentheses for parsing
+                        pattern = r'(?:find_dependency|find_package)\s*\((.*?)\)'
+                        matches = re.findall(pattern, content, re.IGNORECASE | re.DOTALL)
+
+                        found_deps = {} # Map dep_name -> version
+
+                        for match in matches:
+                            # Split by whitespace into individual arguments
+                            args = match.strip().split()
+                            if not args:
+                                continue
+
+                            dep_name = args[0].strip('"\'')
+
+                            # Filter variables and CMake internal keywords
+                            if '$' in dep_name or '{' in dep_name or dep_name in ["REQUIRED", "COMPONENTS", "MODULE", "CONFIG"]:
+                                continue
+
+                            # 3. Check for version (usually the second argument)
+                            version = None
+                            if len(args) > 1:
+                                second_arg = args[1].strip('"\'')
+                                # Ensure it's a version string (e.g., 6.9.0) and not a keyword
+                                if re.match(r'^[0-9.]+$', second_arg):
+                                    version = second_arg
+
+                            # Store the highest version found for this dependency
+                            if dep_name not in found_deps or (version and found_deps[dep_name] < version):
+                                found_deps[dep_name] = version
+
+                        for dep_name, version in sorted(found_deps.items()):
+                            # Build the RPM requirement string
+                            if version:
+                                req = f"cmake({dep_name}) >= {version}"
+                            else:
+                                req = f"cmake({dep_name})"
+
+                            if req == req.lower():
+                                print(req.lower())
+                            else:
+                                # Standard (lower or Original) fallback
+                                print(f"({req.lower()} or {req})")
+                except Exception:
                     pass
 
     def parseCmakeModuleConfig(self, configFile):
