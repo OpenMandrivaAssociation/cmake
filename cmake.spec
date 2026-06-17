@@ -45,7 +45,7 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	4.3.3
+Version:	4.3.4
 Release:	%{?beta:0.%{beta}.}1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
