@@ -1,16 +1,16 @@
-diff -up cmake-4.0.0-rc4/Source/cmGeneratorTarget_IncludeDirectories.cxx.3~ cmake-4.0.0-rc4/Source/cmGeneratorTarget_IncludeDirectories.cxx
---- cmake-4.0.0-rc4/Source/cmGeneratorTarget_IncludeDirectories.cxx.3~	2025-03-17 13:50:57.577327710 +0100
-+++ cmake-4.0.0-rc4/Source/cmGeneratorTarget_IncludeDirectories.cxx	2025-03-17 13:54:49.268987400 +0100
-@@ -163,7 +163,7 @@ void processIncludeDirectories(cmGenerat
+diff -up cmake-4.4.0/Source/cmGeneratorTarget_IncludeDirectories.cxx.3~ cmake-4.4.0/Source/cmGeneratorTarget_IncludeDirectories.cxx
+--- cmake-4.4.0/Source/cmGeneratorTarget_IncludeDirectories.cxx.3~	2026-07-10 16:28:04.106542530 +0200
++++ cmake-4.4.0/Source/cmGeneratorTarget_IncludeDirectories.cxx	2026-07-10 16:28:04.126710539 +0200
+@@ -155,7 +155,7 @@ void processIncludeDirectories(cmGenerat
      for (std::string& entryInclude : entry.Values) {
        if (fromImported && !cmSystemTools::FileExists(entryInclude)) {
          tgt->GetLocalGenerator()->IssueMessage(
 -          MessageType::FATAL_ERROR,
-+          MessageType::AUTHOR_WARNING,
++          MessageType::WARNING,
            cmStrCat(
              "Imported target \"", targetName,
              "\" includes non-existent path\n  \"", entryInclude,
-@@ -173,7 +173,11 @@ void processIncludeDirectories(cmGenerat
+@@ -165,7 +165,11 @@ void processIncludeDirectories(cmGenerat
              "* An install or uninstall procedure did not complete "
              "successfully.\n"
              "* The installation package was faulty and references files it "
