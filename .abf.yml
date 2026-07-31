@@ -1,2 +1,3 @@
 sources:
-  cmake-4.4.0.tar.gz: 6f84daeafc6fe0c408cff0192faab004a760c1b0
+  cmake-4.4.1.tar.gz: d635e1e983398e87ac2846e50e7ddd9095d1027d
+  cmake.attr: 2af2f64ce4bb22afc16a245cf13e986d1aa83532
