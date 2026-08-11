@@ -86,6 +86,7 @@ BuildRequires:	pkgconfig(zlib)
 BuildRequires:	xz
 BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(bzip2)
+BuildRequires:	pkgconfig(libssl)
 BuildRequires:	python-sphinx
 BuildRequires:	make
 %if !%{with bootstrap}
