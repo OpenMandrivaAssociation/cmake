@@ -1,6 +1,9 @@
 %define shortVersion %(echo %{version} | cut -d. -f1,2)
 
-%bcond_with bootstrap
+# Existing cooker cmake is uninstallable after the jsoncpp 1.9.8 soname
+# bump (so.26 -> so.27). Bootstrap once so we can publish 4.4.2, then
+# rebuild without bootstrap to restore system jsoncpp/cppdap and qtgui.
+%bcond_without bootstrap
 
 # Keep this in sync with the list of cross tools we build
 # in other packages (binutils, gcc, ...)
