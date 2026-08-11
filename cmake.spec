@@ -82,31 +82,34 @@ Patch3:		cmake-3.4.1-dont-override-fPIC-with-fPIE.patch
 Patch4:		cmake-4.0.0-allow-old-cmake_minimum_required.patch
 BuildRequires:	perl
 BuildRequires:	pkgconfig(ncurses)
-BuildRequires:	pkgconfig(libcurl)
-BuildRequires:	pkgconfig(libidn)
-BuildRequires:	pkgconfig(libuv)
 BuildRequires:	pkgconfig(zlib)
 BuildRequires:	xz
 BuildRequires:	pkgconfig(expat)
 BuildRequires:	pkgconfig(bzip2)
-BuildRequires:	pkgconfig(libarchive)
 BuildRequires:	python-sphinx
 BuildRequires:	make
 %if !%{with bootstrap}
+# These -devel packages Require cmake() (via shipped *.cmake files). After
+# the jsoncpp 1.9.8 soname bump, cooker cmake is uninstallable, so the
+# bootstrap build must not pull them in.
+BuildRequires:	pkgconfig(libcurl)
+BuildRequires:	pkgconfig(libidn)
+BuildRequires:	pkgconfig(libuv)
+BuildRequires:	pkgconfig(libarchive)
 # We need a copy of ourselves for the cmake(*) dependency generator to work
 # and create all the cmake(*) Provides for the built-in modules
 BuildRequires:	pkgconfig(libzstd)
 BuildRequires:	cmake
 BuildRequires:	cmake(jsoncpp)
 BuildRequires:	cmake(cppdap)
+BuildRequires:	rhash-devel
+BuildRequires:	gcc-gfortran
 %endif
 %if %{with gui}
 BuildRequires:	qmake-qt6
 BuildRequires:	pkgconfig(Qt6Gui)
 BuildRequires:	pkgconfig(Qt6Widgets)
 %endif
-BuildRequires:	rhash-devel
-BuildRequires:	gcc-gfortran
 # For compatibility with Fedora and Mageia
 Provides:	cmake-filesystem = %{EVRD}
 Provides:	cmake-filesystem%{?_isa} = %{EVRD}
