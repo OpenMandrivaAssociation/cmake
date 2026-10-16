@@ -26,7 +26,7 @@
 %endif
 %endif
 
-#define beta rc5
+%define beta rc1
 
 %ifarch %{arm}
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20568
@@ -47,8 +47,8 @@
 
 Name:		cmake
 Summary:	Cross-platform, open-source make system
-Version:	4.4.4
-Release:	%{?beta:0.%{beta}.}2
+Version:	4.5.0
+Release:	%{?beta:0.%{beta}.}1
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other

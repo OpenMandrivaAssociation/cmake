@@ -1,8 +1,8 @@
-diff -up cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx.4~ cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx
---- cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx.4~	2025-03-17 13:55:17.850090427 +0100
-+++ cmake-4.0.0-rc4/Source/cmLocalGenerator.cxx	2025-03-17 13:56:34.624192288 +0100
-@@ -2508,7 +2508,7 @@ void cmLocalGenerator::AddFeatureFlags(s
-                  (targetType == cmStateEnums::MODULE_LIBRARY));
+diff -up cmake-4.5.0-rc1/Source/cmLocalGenerator.cxx.omv~ cmake-4.5.0-rc1/Source/cmLocalGenerator.cxx
+--- cmake-4.5.0-rc1/Source/cmLocalGenerator.cxx.omv~
++++ cmake-4.5.0-rc1/Source/cmLocalGenerator.cxx
+@@ -2710,7 +2710,7 @@ void cmLocalGenerator::AddFeatureFlags(std::string& flags,
+                  (targetType == cm::TargetType::MODULE_LIBRARY));
  
    if (target->GetLinkInterfaceDependentBoolProperty(
 -        "POSITION_INDEPENDENT_CODE", config)) {
