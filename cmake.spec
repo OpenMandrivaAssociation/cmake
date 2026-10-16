@@ -231,11 +231,19 @@ fi
 %endif
 
 %build
-# A couple of full-LTO links still do not fit next to the tmpfs tree
-# on a 64GB builder. %limit_build scales with RAM, so the large
-# aarch64 builders keep a wide compile.
-%limit_build -m 24576
+%ifarch x86_64
+# 32-way full LTO of libCMakeLib was OOM-killed on this builder.
+# 8GB per job leaves headroom for the 80% tmpfs build root.
+mem_kb=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+max_jobs=$((mem_kb / 8388608))
+[ "$max_jobs" -ge 1 ] || max_jobs=1
+ncpus=$(/usr/bin/getconf _NPROCESSORS_ONLN)
+[ "$ncpus" -le "$max_jobs" ] || ncpus=$max_jobs
+echo "Using $ncpus build jobs (MemTotal ${mem_kb} kB)"
+%make_build -C build -j$ncpus
+%else
 %make_build -C build
+%endif
 
 %install
 %make_install -C build
