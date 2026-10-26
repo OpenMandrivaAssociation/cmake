@@ -48,7 +48,7 @@
 Name:		cmake
 Summary:	Cross-platform, open-source make system
 Version:	4.5.0
-Release:	%{?beta:0.%{beta}.}2
+Release:	%{?beta:0.%{beta}.}3
 Source0:	http://www.cmake.org/files/v%{shortVersion}/%{name}-%{version}%{?beta:-%{beta}}.tar.gz
 License:	BSD
 Group:		Development/Other
@@ -60,8 +60,11 @@ Source1:	https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.attr
 Source2:	cmake.prov
 # cmake.req is based on Fedora's versions found at
 # https://src.fedoraproject.org/rpms/cmake/raw/master/f/cmake.req
-# And extended with a simplistic check for KDE Frameworks interdependencies
-# Also, we drop the cmake-filesystem requirement (which is a non-issue in OM)
+# Finds in a branch this config proves dead (if(OFF), set(FLAG OFF) /
+# if(FLAG), if(WIN32), if(APPLE), if(NOT UNIX), AND/OR/NOT of those) are
+# not dependencies. Cooker targets are UNIX and not Windows or Apple.
+# Anything we cannot prove is kept. Also, we drop the cmake-filesystem
+# requirement (which is a non-issue in OM).
 Source3:	cmake.req
 Source100:	cmake.rpmlintrc
 Patch0:		cmake-3.23.2-qt6-searchpath.patch

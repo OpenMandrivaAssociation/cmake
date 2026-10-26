@@ -32,6 +32,598 @@ import re
 import subprocess
 
 
+class ParseError(Exception):
+    pass
+
+
+# A command this pass does not model forgets a remembered flag only when the
+# call names that flag. include() and local macros can assign other variables;
+# the ON/OFF literals folded here are not written that way in generated configs.
+_OFF_NAMES = frozenset(('0', 'off', 'no', 'false', 'n', 'ignore', 'notfound'))
+_ON_NAMES = frozenset(('1', 'on', 'yes', 'true', 'y'))
+_NAME_RE = re.compile(r'[A-Za-z_][A-Za-z0-9_-]*')
+# Cooker packages target UNIX and not Windows or Apple. Names are
+# case-sensitive, matching CMake. A set() in the file, or any command that
+# names one of these, drops it and the condition stays unknown after that.
+_PLATFORM = {
+    'UNIX': True,
+    'WIN32': False,
+    'APPLE': False,
+}
+
+
+def _is_off_value(value):
+    """CMake if(<variable>) false constants. Not the literal number parser."""
+    if value == '':
+        return True
+    low = value.lower()
+    if low in _OFF_NAMES:
+        return True
+    return low.endswith('-notfound')
+
+
+def _is_on_literal(text):
+    """Truth of a bare or quoted if() token.
+
+    None means the token is not one of the literals we know. An unknown
+    word may be a variable set by the project that included this config.
+    """
+    if text == '':
+        return False
+    if re.fullmatch(r'[+-]?\d+', text):
+        return int(text) != 0
+    low = text.lower()
+    if low in _OFF_NAMES or low.endswith('-notfound'):
+        return False
+    if low in _ON_NAMES:
+        return True
+    return None
+
+
+def _is_name(text):
+    return _NAME_RE.fullmatch(text) is not None
+
+
+def _bracket_open_len(text, i):
+    match = re.match(r'\[=*\[', text[i:])
+    if not match:
+        return 0
+    return match.end()
+
+
+def _skip_bracket(text, i):
+    match = re.match(r'\[(=*)\[', text[i:])
+    if not match:
+        raise ParseError('bracket')
+    close = ']' + match.group(1) + ']'
+    end = text.find(close, i + match.end())
+    if end < 0:
+        raise ParseError('unclosed bracket')
+    return end + len(close)
+
+
+def _skip_string(text, i):
+    # i points at the opening quote.
+    i += 1
+    n = len(text)
+    while i < n:
+        if text[i] == '\\':
+            i += 2
+            continue
+        if text[i] == '"':
+            return i + 1
+        i += 1
+    raise ParseError('unclosed string')
+
+
+def _unescape(text):
+    out = []
+    i = 0
+    while i < len(text):
+        if text[i] == '\\' and i + 1 < len(text):
+            out.append(text[i + 1])
+            i += 2
+        else:
+            out.append(text[i])
+            i += 1
+    return ''.join(out)
+
+
+def _skip_comment(text, i):
+    # i points at '#'.
+    if _bracket_open_len(text, i + 1):
+        return _skip_bracket(text, i + 1)
+    end = text.find('\n', i)
+    if end < 0:
+        return len(text)
+    return end + 1
+
+
+def _blank(text, spans):
+    if not spans:
+        return text
+    buf = list(text)
+    for start, end in spans:
+        for i in range(start, end):
+            if buf[i] != '\n':
+                buf[i] = ' '
+    return ''.join(buf)
+
+
+def _iter_commands(text, blanks):
+    """Yield (name, args, start, end) for top-level command calls.
+
+    Bracket comments are recorded in blanks so a commented-out
+    find_package() is not a dependency. A command we cannot tokenize
+    raises ParseError; the caller then keeps every dependency.
+    """
+    i = 0
+    n = len(text)
+    while i < n:
+        c = text[i]
+        if c.isspace():
+            i += 1
+            continue
+        if c == '#':
+            end = _skip_comment(text, i)
+            if _bracket_open_len(text, i + 1):
+                blanks.append((i, end))
+            i = end
+            continue
+        if c.isalpha() or c == '_':
+            j = i + 1
+            while j < n and (text[j].isalnum() or text[j] == '_'):
+                j += 1
+            k = j
+            while k < n and text[k] in ' \t\r\n':
+                k += 1
+            if k < n and text[k] == '(':
+                end = _match_paren(text, k, blanks)
+                yield text[i:j], text[k + 1:end - 1], i, end
+                i = end
+                continue
+            i = j
+            continue
+        i += 1
+
+
+def _match_paren(text, open_i, blanks):
+    i = open_i + 1
+    depth = 1
+    n = len(text)
+    while i < n:
+        c = text[i]
+        if c == '#':
+            end = _skip_comment(text, i)
+            if _bracket_open_len(text, i + 1):
+                blanks.append((i, end))
+            i = end
+            continue
+        if c == '"':
+            i = _skip_string(text, i)
+            continue
+        if c == '[' and _bracket_open_len(text, i):
+            i = _skip_bracket(text, i)
+            continue
+        if c == '(':
+            depth += 1
+        elif c == ')':
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        i += 1
+    raise ParseError('unclosed paren')
+
+
+def _split_args(text):
+    """Split a command argument list. None if the list is not simple."""
+    args = []
+    buf = []
+    i = 0
+    n = len(text)
+
+    def flush():
+        if buf:
+            args.append(''.join(buf))
+            buf.clear()
+
+    while i < n:
+        c = text[i]
+        if c.isspace():
+            flush()
+            i += 1
+            continue
+        if c == '#':
+            flush()
+            i = _skip_comment(text, i)
+            continue
+        if c == '"':
+            flush()
+            end = _skip_string(text, i)
+            args.append(_unescape(text[i + 1:end - 1]))
+            i = end
+            continue
+        if c in '()' or (c == '[' and _bracket_open_len(text, i)):
+            return None
+        buf.append(c)
+        i += 1
+    flush()
+    return args
+
+
+def _tokenize_cond(text):
+    tokens = []
+    i = 0
+    n = len(text)
+    while i < n:
+        c = text[i]
+        if c.isspace():
+            i += 1
+            continue
+        if c == '#':
+            i = _skip_comment(text, i)
+            continue
+        if c in '()':
+            tokens.append(('punct', c))
+            i += 1
+            continue
+        if c == '"':
+            end = _skip_string(text, i)
+            tokens.append(('str', _unescape(text[i + 1:end - 1])))
+            i = end
+            continue
+        if c == '[' and _bracket_open_len(text, i):
+            end = _skip_bracket(text, i)
+            tokens.append(('unknown', ''))
+            i = end
+            continue
+        j = i
+        while j < n and not text[j].isspace() and text[j] not in '()"#':
+            j += 1
+        if j == i:
+            raise ParseError('token')
+        tokens.append(('word', text[i:j]))
+        i = j
+    return tokens
+
+
+def _eval_word(word, known, allow_vars):
+    if '$' in word or '@' in word or '{' in word or '}' in word:
+        return None
+    literal = _is_on_literal(word)
+    if literal is not None:
+        # Boolean keywords win over a variable of the same name: set(ON OFF)
+        # does not make if(ON) false.
+        return literal
+    if not _is_name(word) or word not in known:
+        return None
+    # Platform variables stay true or false inside a macro. Other variables
+    # there are call-time, so they stay unknown.
+    if allow_vars or word in _PLATFORM:
+        return known[word]
+    return None
+
+
+def _combine(op, left, right):
+    if op == 'and':
+        if left is False or right is False:
+            return False
+        if left is True and right is True:
+            return True
+        return None
+    if left is True or right is True:
+        return True
+    if left is False and right is False:
+        return False
+    return None
+
+
+class _CondParser:
+    def __init__(self, tokens, known, allow_vars):
+        self.tokens = tokens
+        self.i = 0
+        self.known = known
+        self.allow_vars = allow_vars
+
+    def peek(self):
+        if self.i >= len(self.tokens):
+            return None
+        return self.tokens[self.i]
+
+    def pop(self):
+        token = self.peek()
+        if token is None:
+            raise ParseError('end')
+        self.i += 1
+        return token
+
+    def parse_expr(self):
+        val = self.parse_not()
+        while True:
+            token = self.peek()
+            if token is None or token[0] != 'word' or token[1].lower() not in ('and', 'or'):
+                break
+            op = token[1].lower()
+            self.pop()
+            rhs = self.parse_not()
+            val = _combine(op, val, rhs)
+        return val
+
+    def parse_not(self):
+        token = self.peek()
+        if token is not None and token[0] == 'word' and token[1].lower() == 'not':
+            self.pop()
+            val = self.parse_not()
+            if val is None:
+                return None
+            return not val
+        return self.parse_atom()
+
+    def parse_atom(self):
+        token = self.pop()
+        if token[0] == 'punct' and token[1] == '(':
+            val = self.parse_expr()
+            close = self.pop()
+            if close != ('punct', ')'):
+                raise ParseError('paren')
+            return val
+        if token[0] == 'str':
+            literal = _is_on_literal(token[1])
+            # Quoted text that is not a boolean or an integer ("hello",
+            # "2.0") is left unknown. Folding it would need CMake's full
+            # number parser for no config file we ship.
+            return literal
+        if token[0] == 'word':
+            return _eval_word(token[1], self.known, self.allow_vars)
+        return None
+
+
+def _eval_condition(text, known, allow_vars):
+    """True, False, or None when the condition is not one we can prove."""
+    try:
+        tokens = _tokenize_cond(text)
+        if not tokens:
+            return None
+        parser = _CondParser(tokens, known, allow_vars)
+        val = parser.parse_expr()
+        if parser.peek() is not None:
+            return None
+        return val
+    except ParseError:
+        return None
+
+
+class _Frame:
+    def __init__(self):
+        self.decided = False
+        self.outcome = 'live'
+        self.saw_else = False
+
+
+def _open_branch(frame, cond, is_else):
+    if frame.decided is True:
+        frame.outcome = 'dead'
+        return
+    if frame.decided == 'maybe':
+        frame.outcome = 'maybe'
+        return
+    if is_else:
+        frame.decided = True
+        frame.outcome = 'live'
+        return
+    if cond is True:
+        frame.decided = True
+        frame.outcome = 'live'
+    elif cond is False:
+        frame.outcome = 'dead'
+    else:
+        frame.decided = 'maybe'
+        frame.outcome = 'maybe'
+
+
+def _region(stack, depth, loop_depth, killed):
+    if killed:
+        return 'dead'
+    for frame in stack:
+        if frame.outcome == 'dead':
+            return 'dead'
+    if depth:
+        return 'macro'
+    if loop_depth:
+        # The body may never run, so a set() here is not a fact.
+        return 'maybe'
+    for frame in stack:
+        if frame.outcome == 'maybe':
+            return 'maybe'
+    return 'live'
+
+
+def _poison_mentioned(args, known):
+    if not known or not args:
+        return
+    for name in list(known):
+        if re.search(r'(?<![A-Za-z0-9_-])' + re.escape(name) + r'(?![A-Za-z0-9_-])', args):
+            del known[name]
+
+
+def _poison_found(args, known):
+    """find_package() writes <Pkg>_FOUND and friends."""
+    if not known:
+        return
+    parts = _split_args(args)
+    pkg = parts[0] if parts else ''
+    for name in list(known):
+        if name.endswith('_FOUND') or name.endswith('_NOT_FOUND'):
+            del known[name]
+            continue
+        if pkg and (name == pkg or name.startswith(pkg + '_')):
+            del known[name]
+
+
+def _apply_set(args, known, reg):
+    if reg in ('dead', 'macro'):
+        return
+    parts = _split_args(args)
+    # A computed name (set(${prefix}_FOO ...)) or a parenthesized value is
+    # not a literal we can track. Leave every other flag alone.
+    if not parts or parts is None or '$' in parts[0] or not _is_name(parts[0]):
+        return
+    name = parts[0]
+    if len(parts) > 2 or (len(parts) == 2 and '$' in parts[1]):
+        known.pop(name, None)
+        return
+    if reg == 'maybe':
+        known.pop(name, None)
+        return
+    value = '' if len(parts) == 1 else parts[1]
+    known[name] = not _is_off_value(value)
+
+
+def _apply_unset(args, known, reg):
+    if reg in ('dead', 'macro'):
+        return
+    parts = _split_args(args)
+    if not parts or '$' in parts[0] or not _is_name(parts[0]):
+        return
+    if len(parts) != 1 or reg == 'maybe':
+        known.pop(parts[0], None)
+        return
+    known[parts[0]] = False
+
+
+def _apply_option(args, known, reg):
+    # option() only fills in a default when the caller has not set it.
+    if reg in ('dead', 'macro'):
+        return
+    parts = _split_args(args)
+    if not parts or parts is None or '$' in parts[0] or not _is_name(parts[0]):
+        return
+    known.pop(parts[0], None)
+
+
+def _mask_dead_finds(text):
+    blanks = []
+    known = dict(_PLATFORM)
+    stack = []
+    depth = 0
+    loop_depth = 0
+    killed = False
+
+    for name, args, start, end in _iter_commands(text, blanks):
+        lname = name.lower()
+        reg = _region(stack, depth, loop_depth, killed)
+
+        if lname in ('find_package', 'find_dependency'):
+            if reg == 'dead':
+                blanks.append((start, end))
+            elif reg in ('live', 'maybe'):
+                _poison_found(args, known)
+                _poison_mentioned(args, known)
+        elif lname == 'set':
+            _apply_set(args, known, reg)
+        elif lname == 'unset':
+            _apply_unset(args, known, reg)
+        elif lname == 'option':
+            _apply_option(args, known, reg)
+        elif lname == 'return':
+            if reg == 'live':
+                killed = True
+        elif lname == 'if':
+            cond = _eval_condition(args, known, depth == 0)
+            frame = _Frame()
+            _open_branch(frame, cond, False)
+            stack.append(frame)
+        elif lname == 'elseif':
+            if not stack or stack[-1].saw_else:
+                raise ParseError('elseif')
+            cond = _eval_condition(args, known, depth == 0)
+            _open_branch(stack[-1], cond, False)
+        elif lname == 'else':
+            if not stack or stack[-1].saw_else:
+                raise ParseError('else')
+            stack[-1].saw_else = True
+            _open_branch(stack[-1], None, True)
+        elif lname == 'endif':
+            if not stack:
+                raise ParseError('endif')
+            stack.pop()
+        elif lname in ('macro', 'function'):
+            depth += 1
+        elif lname in ('endmacro', 'endfunction'):
+            depth -= 1
+            if depth < 0:
+                raise ParseError('endmacro')
+        elif lname in ('foreach', 'while'):
+            loop_depth += 1
+        elif lname in ('endforeach', 'endwhile'):
+            loop_depth -= 1
+            if loop_depth < 0:
+                raise ParseError('endforeach')
+        elif reg in ('live', 'maybe'):
+            # Safe commands and macros we do not expand are treated the same:
+            # forget a flag only when this call names it.
+            _poison_mentioned(args, known)
+
+    if stack or depth or loop_depth:
+        raise ParseError('unbalanced')
+    return _blank(text, blanks)
+
+
+def mask_dead_finds(text):
+    """Drop find_package calls from branches this file proves are dead.
+
+    On any construct we do not understand, the text is returned unchanged.
+    """
+    try:
+        return _mask_dead_finds(text)
+    except ParseError:
+        return text
+
+
+def cmake_requires_from_text(content):
+    content = mask_dead_finds(content)
+    # Line comments. Bracket comments were blanked while masking.
+    content = re.sub(r'#.*', '', content)
+
+    pattern = r'(?:find_dependency|find_package)\s*\((.*?)\)'
+    matches = re.findall(pattern, content, re.IGNORECASE | re.DOTALL)
+
+    found_deps = {}
+
+    for match in matches:
+        args = match.strip().split()
+        if not args:
+            continue
+
+        dep_name = args[0].strip('"\'')
+
+        if '$' in dep_name or '{' in dep_name or dep_name in ["REQUIRED", "COMPONENTS", "MODULE", "CONFIG"]:
+            continue
+
+        version = None
+        if len(args) > 1:
+            second_arg = args[1].strip('"\'')
+            if re.match(r'^[0-9.]+$', second_arg):
+                version = second_arg
+
+        prev = found_deps.get(dep_name, None)
+        if dep_name not in found_deps or (version and (prev is None or prev < version)):
+            found_deps[dep_name] = version
+
+    reqs = []
+    for dep_name, version in sorted(found_deps.items()):
+        if version:
+            req = f"cmake({dep_name}) >= {version}"
+        else:
+            req = f"cmake({dep_name})"
+
+        if req == req.lower():
+            reqs.append(req.lower())
+        else:
+            reqs.append(f"({req.lower()} or {req})")
+    return reqs
+
+
 class CMakeParser:
     def __init__(self, filelist=None):
         if filelist is None:
@@ -43,54 +635,8 @@ class CMakeParser:
             if modulePath and cmakeModule:
                 try:
                     with open(path, 'r') as fp:
-                        content = fp.read()
-
-                        # 1. Safe comment stripping
-                        content = re.sub(r'#.*', '', content)
-
-                        # 2. Extract find_dependency/find_package block contents
-                        # This regex captures everything inside the parentheses for parsing
-                        pattern = r'(?:find_dependency|find_package)\s*\((.*?)\)'
-                        matches = re.findall(pattern, content, re.IGNORECASE | re.DOTALL)
-
-                        found_deps = {} # Map dep_name -> version
-
-                        for match in matches:
-                            # Split by whitespace into individual arguments
-                            args = match.strip().split()
-                            if not args:
-                                continue
-
-                            dep_name = args[0].strip('"\'')
-
-                            # Filter variables and CMake internal keywords
-                            if '$' in dep_name or '{' in dep_name or dep_name in ["REQUIRED", "COMPONENTS", "MODULE", "CONFIG"]:
-                                continue
-
-                            # 3. Check for version (usually the second argument)
-                            version = None
-                            if len(args) > 1:
-                                second_arg = args[1].strip('"\'')
-                                # Ensure it's a version string (e.g., 6.9.0) and not a keyword
-                                if re.match(r'^[0-9.]+$', second_arg):
-                                    version = second_arg
-
-                            # Store the highest version found for this dependency
-                            if dep_name not in found_deps or (version and found_deps[dep_name] < version):
-                                found_deps[dep_name] = version
-
-                        for dep_name, version in sorted(found_deps.items()):
-                            # Build the RPM requirement string
-                            if version:
-                                req = f"cmake({dep_name}) >= {version}"
-                            else:
-                                req = f"cmake({dep_name})"
-
-                            if req == req.lower():
-                                print(req.lower())
-                            else:
-                                # Standard (lower or Original) fallback
-                                print(f"({req.lower()} or {req})")
+                        for req in cmake_requires_from_text(fp.read()):
+                            print(req)
                 except Exception:
                     pass
 
@@ -109,5 +655,415 @@ class CMakeParser:
             return (None, None, False)
 
 
+def _self_test():
+    def names(text):
+        found = []
+        for req in cmake_requires_from_text(text):
+            found.extend(re.findall(r'cmake\(([^)]+)\)', req))
+        return found
+
+    def check(text, keep, drop):
+        got = names(text)
+        for name in keep:
+            if name not in got:
+                raise SystemExit('missing %s in %s\n%s' % (name, got, text))
+        for name in drop:
+            if name in got:
+                raise SystemExit('kept %s in %s\n%s' % (name, got, text))
+
+    check('''
+set(_sdl3_framework OFF)
+if(NOT TARGET SDL3::Headers)
+  include("${CMAKE_CURRENT_LIST_DIR}/SDL3headersTargets.cmake")
+  set_property(TARGET SDL3::Headers PROPERTY SYSTEM 0)
+endif()
+macro(find_sdl3_static_dependencies)
+endmacro()
+if(_sdl3_framework)
+  find_package(SDL3-static CONFIG QUIET)
+else()
+  if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/SDL3staticTargets.cmake")
+    find_sdl3_static_dependencies()
+  endif()
+  find_package(LiveDep)
+endif()
+if(_sdl3_framework)
+  find_package(SDL3_test CONFIG QUIET)
+endif()
+''', ['LiveDep'], ['SDL3-static', 'SDL3_test'])
+
+    check('''
+if(NOT ON)
+  if(TRUE)
+    find_dependency(ZLIB)
+  endif()
+endif()
+find_package(Shown)
+''', ['Shown'], ['ZLIB'])
+
+    check('''
+set(A OFF)
+set(B OFF)
+if(A OR B)
+  find_package(Neither)
+endif()
+set(A ON)
+if(A OR UNKNOWN_PLAT)
+  find_package(Either)
+else()
+  find_package(ElseHidden)
+endif()
+''', ['Either'], ['Neither', 'ElseHidden'])
+
+    # Native packages are UNIX, not Windows or Apple. set() in this file
+    # still wins. Lowercase win32 is a different variable.
+    check('''
+if(WIN32)
+  find_package(WinOnly)
+else()
+  find_package(UnixOnly)
+endif()
+if(APPLE)
+  find_package(AppleOnly)
+else()
+  find_package(NotApple)
+endif()
+if(NOT WIN32 AND NOT APPLE)
+  find_package(DesktopUnix)
+endif()
+if(WIN32 OR APPLE)
+  find_package(WinOrApple)
+endif()
+if(UNIX)
+  find_package(UnixBody)
+else()
+  find_package(NotUnix)
+endif()
+if(win32)
+  find_package(LowerWin)
+else()
+  find_package(LowerElse)
+endif()
+''', ['UnixOnly', 'NotApple', 'DesktopUnix', 'UnixBody', 'LowerWin', 'LowerElse'],
+     ['WinOnly', 'AppleOnly', 'WinOrApple', 'NotUnix'])
+
+    check('''
+set(WIN32 ON)
+if(WIN32)
+  find_package(ForcedWin)
+else()
+  find_package(NotForced)
+endif()
+set(UNIX OFF)
+if(UNIX)
+  find_package(UnixStill)
+else()
+  find_package(UnixCleared)
+endif()
+''', ['ForcedWin', 'UnixCleared'], ['NotForced', 'UnixStill'])
+
+    check('''
+macro(m)
+  if(WIN32)
+    find_package(WinInMacro)
+  endif()
+  if(APPLE)
+    find_package(AppleInMacro)
+  endif()
+  if(UNIX)
+    find_package(UnixInMacro)
+  endif()
+  if(FOO)
+    find_package(FromVar)
+  endif()
+endmacro()
+''', ['UnixInMacro', 'FromVar'], ['WinInMacro', 'AppleInMacro'])
+
+    # A command that names the platform variable means we no longer know it.
+    check('''
+message(STATUS "WIN32=${WIN32}")
+if(WIN32)
+  find_package(WinOnly)
+else()
+  find_package(UnixOnly)
+endif()
+''', ['WinOnly', 'UnixOnly'], [])
+
+    check('''
+set(LIBXML2_SHARED ON)
+if(NOT LIBXML2_SHARED)
+  find_dependency(Iconv)
+else()
+  find_package(SharedOk)
+endif()
+''', ['SharedOk'], ['Iconv'])
+
+    check('''
+set(FOO OFF)
+macro(m)
+  if(FOO)
+    find_package(FromVar)
+  endif()
+  if(OFF)
+    find_package(FromLit)
+  endif()
+endmacro()
+''', ['FromVar'], ['FromLit'])
+
+    # m() is not expanded. It does not name FOO, so the literal set stands.
+    check('''
+set(FOO OFF)
+m()
+if(FOO)
+  find_package(Bar)
+else()
+  find_package(Baz)
+endif()
+''', ['Baz'], ['Bar'])
+
+    check('''
+set(FOO OFF)
+if(OFF)
+  set(FOO ON)
+endif()
+if(FOO)
+  find_package(Bar)
+else()
+  find_package(Baz)
+endif()
+''', ['Baz'], ['Bar'])
+
+    check('''
+set(GFLAGS_USE_TARGET_NAMESPACE FALSE)
+if(GFLAGS_USE_TARGET_NAMESPACE)
+  find_package(Namespaced)
+else()
+  find_package(Plain)
+endif()
+''', ['Plain'], ['Namespaced'])
+
+    # DEFINED is resolved by the caller, not by this file. The set() in that
+    # branch must not be treated as a fact, or both arms would collapse.
+    check('''
+if(NOT DEFINED GFLAGS_SHARED)
+  set(GFLAGS_SHARED FALSE)
+endif()
+if(GFLAGS_SHARED)
+  find_package(Shared)
+else()
+  find_package(Static)
+endif()
+''', ['Shared', 'Static'], [])
+
+    check('''
+set(A OFF)
+set(B ON)
+if(A)
+  find_package(One)
+elseif(B)
+  find_package(Two)
+else()
+  find_package(Three)
+endif()
+''', ['Two'], ['One', 'Three'])
+
+    check('''
+set(A OFF)
+if(A)
+  find_package(One)
+elseif(UNKNOWN_PLAT)
+  find_package(Two)
+else()
+  find_package(Three)
+endif()
+''', ['Two', 'Three'], ['One'])
+
+    check('''
+if(ON)
+  if(OFF)
+    find_package(Inner)
+  else()
+    find_package(InnerElse)
+  endif()
+endif()
+''', ['InnerElse'], ['Inner'])
+
+    check('''
+if(TRUE OR FALSE AND FALSE)
+  find_package(No)
+endif()
+if(FALSE AND FALSE OR TRUE)
+  find_package(Yes)
+endif()
+''', ['Yes'], ['No'])
+
+    check('''
+# find_package(Hidden)
+#[[
+if(OFF)
+find_package(AlsoHidden)
+endif()
+]]
+find_package(Shown)
+if(OFF)
+  find_package(Dead)
+endif()
+''', ['Shown'], ['Hidden', 'AlsoHidden', 'Dead'])
+
+    check('''
+if(ON)
+  find_package(Foo 1.2.3 REQUIRED)
+endif()
+''', ['Foo'], [])
+    got = cmake_requires_from_text('find_package(Foo 1.2.3 REQUIRED)\n')
+    if got != ['(cmake(foo) >= 1.2.3 or cmake(Foo) >= 1.2.3)']:
+        raise SystemExit('version: %s' % got)
+
+    check('''
+if(OFF)
+  find_package(Bar)
+if(ON)
+  find_package(Foo)
+endif()
+''', ['Foo', 'Bar'], [])
+
+    check('''
+set(FOO ON)
+list(APPEND FOO x)
+if(FOO)
+  find_package(Bar)
+endif()
+''', ['Bar'], [])
+
+    check('''
+set(FOO OFF)
+include("${CMAKE_CURRENT_LIST_DIR}/Targets.cmake")
+set_property(TARGET Foo PROPERTY SYSTEM 0)
+if(FOO)
+  find_package(Bar)
+else()
+  find_package(Baz)
+endif()
+''', ['Baz'], ['Bar'])
+
+    check('''
+set(FOO OFF)
+if(UNIX)
+  set(FOO ON)
+endif()
+if(FOO)
+  find_package(Bar)
+else()
+  find_package(Baz)
+endif()
+''', ['Bar'], ['Baz'])
+
+    check('''
+set(FOO OFF)
+foreach(x a b)
+  if(FOO)
+    find_package(Bar)
+  endif()
+endforeach()
+''', [], ['Bar'])
+
+    check('''
+set(FOO ON)
+foreach(x ${xs})
+  set(FOO OFF)
+endforeach()
+if(FOO)
+  find_package(Bar)
+endif()
+''', ['Bar'], [])
+
+    check('''
+if(ON)
+  return()
+endif()
+find_package(Foo)
+''', [], ['Foo'])
+
+    check('''
+if(OFF)
+  return()
+endif()
+find_package(Foo)
+''', ['Foo'], [])
+
+    check('''
+if(UNIX)
+  return()
+endif()
+find_package(Foo)
+''', [], ['Foo'])
+
+    check('''
+if(WIN32)
+  return()
+endif()
+find_package(Foo)
+''', ['Foo'], [])
+
+    check('''
+if(APPLE)
+  return()
+endif()
+find_package(Foo)
+''', ['Foo'], [])
+
+    check('''
+set(LLVM_ENABLE_CURL )
+if(LLVM_ENABLE_CURL)
+  find_package(CURL)
+endif()
+set(LLVM_ENABLE_LIBXML2 1)
+if(LLVM_ENABLE_LIBXML2)
+  find_package(LibXml2)
+endif()
+set(LLVM_ENABLE_HTTPLIB OFF)
+if(LLVM_ENABLE_HTTPLIB)
+  find_package(httplib)
+endif()
+''', ['LibXml2'], ['CURL', 'httplib'])
+
+    check('''
+set(NEED_A FALSE)
+set(NEED_B FALSE)
+if(NEED_A OR NEED_B)
+  find_package(PkgConfig)
+endif()
+if(NEED_A)
+  find_package(Threads REQUIRED)
+endif()
+''', [], ['PkgConfig', 'Threads'])
+
+    # Quoted literals, as curl/FAudio/FreeRDP generate them.
+    check('''
+if("OFF" OR "ON")
+  if("OFF")
+    find_package(SDL2)
+  endif()
+  if("ON")
+    find_package(SDL3)
+  endif()
+endif()
+if("")
+  find_package(Cares)
+endif()
+if("ON" AND NOT "ON")
+  find_package(ZLIB)
+endif()
+if(NOT OFF AND NOT OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH)
+  find_package(Imath)
+endif()
+''', ['SDL3', 'Imath'], ['SDL2', 'Cares', 'ZLIB'])
+
+    print('cmake.req self-test ok')
+
+
 if __name__ == "__main__":
-    parser = CMakeParser()
+    if '--self-test' in sys.argv:
+        _self_test()
+    else:
+        parser = CMakeParser()
