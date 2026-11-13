@@ -26,8 +26,6 @@
 %endif
 %endif
 
-%define beta rc3
-
 %ifarch %{arm}
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20568
 %global optflags %{optflags} -D_FILE_OFFSET_BITS=64
